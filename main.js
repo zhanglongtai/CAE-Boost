@@ -23,6 +23,7 @@ switch (process.platform) {
 const win = {
     winMainView: null,
     winTestDownload: null,
+    winAddTask: null,
 }
 
 
@@ -32,6 +33,8 @@ const log = function() {
 }
 // ========== util func ==========
 
+
+// ========= App ==========
 app.on('ready', () => {
     if (config.env === 'dev') {
         BrowserWindow.addDevToolsExtension(reactDevtool)
@@ -39,6 +42,7 @@ app.on('ready', () => {
 
     createMainViewWin()
 })
+// ========= App ==========
 
 
 // ========== TestDownload ==========
@@ -122,4 +126,42 @@ const createMainViewWin = function() {
     }
 
     win.winMainView.loadURL(`file://${__dirname}/renderer/mainView.html`)
+
+    win.winMainView.on('closed', () => {
+        win.winMainView = null
+    })
 }
+// ========= MainView ==========
+
+
+// ========= AddTask ==========
+const createAddTaskWin = function() {
+    const options = {
+        width: 600,
+        height: 800,
+        frame: false,
+        parent: win.winMainView,
+        modal: true,
+    }
+
+    win.winAddTask = new BrowserWindow(options)
+
+    if (config.env === 'dev') {
+        win.winAddTask.webContents.openDevTools()
+    }
+
+    win.winAddTask.loadURL(`file://${__dirname}/renderer/addTask.html`)
+
+    win.winAddTask.on('closed', () => {
+        win.winAddTask = null
+    })
+}
+
+ipcMain.on('open-add-task', () => {
+    createAddTaskWin()
+})
+
+ipcMain.on('close-add-task', () => {
+    win.winAddTask.close()
+})
+// ========= AddTask ==========

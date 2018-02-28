@@ -3,6 +3,7 @@ var webpack = require('webpack')
 module.exports = {
     entry: {
         mainView: './src/mainViewIndex.js',
+        addTask: './src/addTaskIndex.js',
     },
   
     output: {

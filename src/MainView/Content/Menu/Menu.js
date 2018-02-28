@@ -5,7 +5,7 @@ import Button from "antd/lib/button"
 
 import log from "../../../util/log"
 
-// const {ipcRenderer} = window.require("electron")
+const { ipcRenderer } = window.require("electron")
 
 const RadioButton = Radio.Button
 const RadioGroup = Radio.Group
@@ -23,6 +23,10 @@ class Menu extends React.Component {
     handleChange(event) {
         const index = parseInt(event.target.value)
         this.props.setContent(index)
+    }
+
+    openAddTask() {
+        ipcRenderer.send('open-add-task')
     }
 
     render() {
@@ -49,7 +53,12 @@ class Menu extends React.Component {
                         top: '24px',
                     }}
                 >
-                    <Button type="primary" icon="plus-circle" size="default">新增任务</Button>
+                    <Button
+                        type="primary"
+                        icon="plus-circle"
+                        size="default"
+                        onClick={this.openAddTask}
+                    >新增任务</Button>
                 </div>
                 <RadioGroup onChange={this.handleChange} value={this.props.contentIndex}>
                     <RadioButton value="0">我的上传</RadioButton>
