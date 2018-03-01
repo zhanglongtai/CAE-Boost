@@ -10,9 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "antd": "^3.2.0",
+    "echarts": "^4.0.4",
     "electron": "^1.7.12",
     "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react-dom": "^16.2.0",
+    "socket.io-client": "^2.0.4"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

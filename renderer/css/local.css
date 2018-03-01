@@ -6,3 +6,15 @@
     background-color: #1890ff;
     cursor: pointer;
 }
+
+.task-detail-nav {
+    /* background-color: #eff3f6; */
+    /* background-image: linear-gradient(-180deg, #fafbfc 0%, #eff3f6 90%); */
+}
+.task-detail-nav:hover {
+    background-color: #e6ebf1;
+    /* background-image: linear-gradient(-180deg, #f0f3f6 0%, #e6ebf1 90%); */
+}
+.task-detail-nav:hover > .task-detail-nav-icon {
+    color: #448AFF;
+}

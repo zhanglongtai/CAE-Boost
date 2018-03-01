@@ -3,7 +3,7 @@ import React from "react"
 
 import Menu from "./Menu"
 import Upload from "./Upload"
-import TaskList from "./TaskList"
+import Task from "./Task"
 import Download from "./Download"
 import log from "../../util/log"
 
@@ -47,7 +47,7 @@ class Content extends React.Component {
                 content = <Upload />
                 break
             case 1:
-                content = <TaskList />
+                content = <Task />
                 break
             case 2:
                 content = <Download />
