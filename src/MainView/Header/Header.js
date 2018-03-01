@@ -132,11 +132,11 @@ class Header extends React.Component {
                                     justifyContent: 'center',
                                 }}
                             >
-                                <Icon type="minus" />
+                                <i className="iconfont icon-window-minimize"></i>
                                 &nbsp;&nbsp;
-                                <Icon type="close" />
+                                <i className="iconfont icon-windowmaximize"></i>
                                 &nbsp;&nbsp;
-                                <Icon type="close" />
+                                <i className="iconfont icon-window-close"></i>
                             </div>
                         </div>
                     </div>
