@@ -131,6 +131,22 @@ const createMainViewWin = function() {
         win.winMainView = null
     })
 }
+
+ipcMain.on('minimize-main-view-win', () => {
+    win.winMainView.minimize()
+})
+
+ipcMain.on('maximize-main-view-win', () => {
+    win.winMainView.maximize()
+})
+
+ipcMain.on('restore-main-view-win', () => {
+    win.winMainView.restore()
+})
+
+ipcMain.on('close-main-view-win', () => {
+    win.winMainView.close()
+})
 // ========= MainView ==========
 
 

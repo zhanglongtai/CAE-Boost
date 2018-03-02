@@ -7,14 +7,43 @@ import Button from "antd/lib/button"
 
 import log from "../../util/log"
 
-// const {ipcRenderer} = window.require("electron")
+const { ipcRenderer } = window.require("electron")
 
 class Header extends React.Component {
     constructor() {
         super()
+
+        this.state = {
+            winMax: false,
+        }
+
+        this.maximizeWin = this.maximizeWin.bind(this)
+        this.restoreWin = this.restoreWin.bind(this)
     }
 
     componentDidMount() {
+    }
+
+    minimizeWin() {
+        ipcRenderer.send('minimize-main-view-win')
+    }
+
+    maximizeWin() {
+        this.setState({
+            winMax: true,
+        })
+        ipcRenderer.send('maximize-main-view-win')
+    }
+
+    restoreWin() {
+        this.setState({
+            winMax: false,
+        })
+        ipcRenderer.send('restore-main-view-win')
+    }
+
+    closeWin() {
+        ipcRenderer.send('close-main-view-win')
     }
 
     render() {
@@ -82,6 +111,8 @@ class Header extends React.Component {
             },
         }
 
+        const { winMax } = this.state
+
         const menu = (
             <Menu>
                 <Menu.Item key="0">修改密码</Menu.Item>
@@ -97,6 +128,56 @@ class Header extends React.Component {
                     username <Icon type="down" />
                 </div>
             </Dropdown>
+        )
+
+        const windowIcon = (
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
+            >
+                <div
+                    onClick={this.minimizeWin}
+                    style={{
+                        width: '30px',
+                        height: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                    className='icon-container'
+                >
+                    <i className="iconfont icon-window-minimize"></i>
+                </div>
+                <div
+                    onClick={winMax ? this.restoreWin : this.maximizeWin}
+                    style={{
+                        width: '30px',
+                        height: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                    className='icon-container'
+                >
+                    {winMax ? <i className="iconfont icon-windowrestore"></i> : <i className="iconfont icon-windowmaximize"></i>}
+                </div>
+                <div
+                    onClick={this.closeWin}
+                    style={{
+                        width: '30px',
+                        height: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                    className='icon-container'
+                >
+                    <i className="iconfont icon-window-close"></i>
+                </div>
+            </div>
         )
 
         return (
@@ -125,19 +206,7 @@ class Header extends React.Component {
                                 &nbsp;&nbsp;
                                 <Icon type="setting" />
                             </div>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <i className="iconfont icon-window-minimize"></i>
-                                &nbsp;&nbsp;
-                                <i className="iconfont icon-windowmaximize"></i>
-                                &nbsp;&nbsp;
-                                <i className="iconfont icon-window-close"></i>
-                            </div>
+                            { windowIcon }
                         </div>
                     </div>
                 </div>
