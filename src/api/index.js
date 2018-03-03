@@ -1,19 +1,9 @@
 import {
-    getJobsAPI,
-    getPartitionsAPI,
-    getRacksAPI,
-    getNodesAPI,
-    getQOSAPI,
+    getloginAPI,
     getResidualAPI,
-    getGanntAPI,
 } from "./api"
 
 export {
-    getJobsAPI,
-    getPartitionsAPI,
-    getRacksAPI,
-    getNodesAPI,
-    getQOSAPI,
+    getloginAPI,
     getResidualAPI,
-    getGanntAPI,
 }

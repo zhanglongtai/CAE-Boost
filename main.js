@@ -21,6 +21,8 @@ switch (process.platform) {
 
 // win pool for client
 const win = {
+    winLogin: null,
+    winRegister: null,
     winMainView: null,
     winTestDownload: null,
     winAddTask: null,
@@ -40,7 +42,8 @@ app.on('ready', () => {
         BrowserWindow.addDevToolsExtension(reactDevtool)
     }
 
-    createMainViewWin()
+    createLoginWin()
+    // createMainViewWin()
 })
 // ========= App ==========
 
@@ -107,6 +110,59 @@ ipcMain.on('download-file', (event, url) => {
     })
 })
 // ========== TestDownload ==========
+
+
+// ========= Login ==========
+const createLoginWin = function() {
+    const options = {
+        width: 600,
+        height: 400,
+        // frame: false,
+    }
+
+    win.winLogin = new BrowserWindow(options)
+
+    win.winLogin.setMenuBarVisibility(false)
+
+    if (config.env === 'dev') {
+        win.winLogin.webContents.openDevTools()
+    }
+
+    win.winLogin.loadURL(`file://${__dirname}/renderer/login.html`)
+
+    win.winLogin.on('closed', () => {
+        win.winLogin = null
+    })
+}
+
+ipcMain.on('open-main-view-win', () => {
+    win.winLogin.close()
+    createMainViewWin()
+})
+// ========= Login ==========
+
+
+// ========= Register ==========
+const createRegisterWin = function() {
+    const options = {
+        width: 600,
+        height: 400,
+        frame: false,
+    }
+
+    win.winRegister = new BrowserWindow(options)
+
+    if (config.env === 'dev') {
+        win.winRegister.webContents.openDevTools()
+    }
+
+    win.winRegister.loadURL(`file://${__dirname}/renderer/register.html`)
+
+    win.winRegister.on('closed', () => {
+        win.winRegister = null
+    })
+}
+// ========= Login ==========
 
 
 // ========= MainView ==========
