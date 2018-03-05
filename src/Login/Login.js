@@ -38,9 +38,9 @@ class Login extends React.Component {
         ipcRenderer.send('ready-to-show')
     }
 
-    navToLogin(content) {
+    navToLogin() {
         this.setState({
-            content: content,
+            content: 'login-form',
             submitting: false,
         })
     }

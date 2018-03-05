@@ -3,6 +3,7 @@ var webpack = require('webpack')
 module.exports = {
     entry: {
         login: './src/loginIndex.js',
+        register: './src/registerIndex.js',
         mainView: './src/mainViewIndex.js',
         addTask: './src/addTaskIndex.js',
     },

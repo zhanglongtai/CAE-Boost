@@ -148,12 +148,12 @@ const closeLoginWin = function() {
 }
 
 ipcMain.on('close-login-win-open-main-view-win', () => {
-    win.winLogin.hidden()
+    win.winLogin.hide()
     createMainViewWin()
 })
 
 ipcMain.on('close-login-win-open-register-win', () => {
-    win.winLogin.hidden()
+    win.winLogin.hide()
     createRegisterWin()
 })
 // ========= Login ==========
@@ -163,12 +163,14 @@ ipcMain.on('close-login-win-open-register-win', () => {
 const createRegisterWin = function() {
     const options = {
         width: 600,
-        height: 400,
-        frame: false,
+        height: 600,
+        // frame: false,
         show: false,
     }
 
     win.winRegister = new BrowserWindow(options)
+
+    win.winRegister.setMenuBarVisibility(false)
 
     if (config.env === 'dev') {
         win.winRegister.webContents.openDevTools()
@@ -176,7 +178,7 @@ const createRegisterWin = function() {
 
     win.winRegister.loadURL(`file://${__dirname}/renderer/register.html`)
 
-    win.on('ready-to-show', () => {
+    win.winRegister.on('ready-to-show', () => {
         closeLoginWin()
         win.winRegister.show()
     })
@@ -193,7 +195,7 @@ const closeRegisterWin = function() {
 }
 
 ipcMain.on('close-register-win-open-login-win', () => {
-    win.winRegister.hidden()
+    win.winRegister.hide()
     createLoginWin()
 })
 // ========= Login ==========
@@ -217,7 +219,7 @@ const createMainViewWin = function() {
 
     win.winMainView.loadURL(`file://${__dirname}/renderer/mainView.html`)
 
-    win.on('ready-to-show', () => {
+    win.winMainView.on('ready-to-show', () => {
         closeLoginWin()
         win.winMainView.show()
     })
