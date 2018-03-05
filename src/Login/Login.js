@@ -2,7 +2,7 @@ import React from "react"
 // import PropTypes from "prop-types"
 import fetch from "isomorphic-fetch"
 
-import FormContent from "./FormContent"
+import LoginForm from "./LoginForm"
 import ErrorMsg from "./ErrorMsg"
 import log from "../util/log"
 import { getloginAPI } from "../api"
@@ -14,7 +14,7 @@ class Login extends React.Component {
         super()
 
         this.state = {
-            content: 'form-content', // 'form-content', 'error-msg'
+            content: 'login-form', // 'login-form', 'error-msg'
             submitting: false,
             autologin: false,
             username: '',
@@ -32,6 +32,10 @@ class Login extends React.Component {
         this.setAutologin = this.setAutologin.bind(this)
         this.loginSubmit = this.loginSubmit.bind(this)
         this.validateFields = this.validateFields.bind(this)
+    }
+
+    componentDidMount() {
+        ipcRenderer.send('ready-to-show')
     }
 
     navToLogin(content) {
@@ -126,7 +130,7 @@ class Login extends React.Component {
                                 password: password,
                             })
                         }
-                        ipcRenderer.send('open-main-view-win')
+                        ipcRenderer.send('close-login-win-open-main-view-win')
                     } else {
                         switch(result.errMsg) {
                             case 'UsernameNotExist':
@@ -203,8 +207,8 @@ class Login extends React.Component {
 
         return (
             <div className='login' style={styles.container}>
-                { content === 'form-content' ?
-                    <FormContent
+                { content === 'login-form' ?
+                    <LoginForm
                         submitting={submitting}
                         autologin={autologin}
                         username={username}

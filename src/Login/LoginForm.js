@@ -12,13 +12,13 @@ const FormItem = Form.Item
 
 const { ipcRenderer } = window.require("electron")
 
-class FormContent extends React.Component {
+class LoginForm extends React.Component {
     constructor(props) {
         super(props)
     }
 
     openRegisterWin() {
-        ipcRenderer.send('open-register-win')
+        ipcRenderer.send('close-login-win-open-register-win')
     }
 
     render() {
@@ -101,7 +101,7 @@ class FormContent extends React.Component {
     }
 }
 
-FormContent.propTypes = {
+LoginForm.propTypes = {
     submitting: PropTypes.bool.isRequired,
     autologin: PropTypes.bool.isRequired,
     username: PropTypes.string.isRequired,
@@ -116,4 +116,4 @@ FormContent.propTypes = {
     loginSubmit: PropTypes.func.isRequired,
 }
 
-export default FormContent
+export default LoginForm

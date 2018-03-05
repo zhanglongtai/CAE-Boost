@@ -117,6 +117,7 @@ const createLoginWin = function() {
     const options = {
         width: 600,
         height: 400,
+        show: false,
         // frame: false,
     }
 
@@ -130,14 +131,30 @@ const createLoginWin = function() {
 
     win.winLogin.loadURL(`file://${__dirname}/renderer/login.html`)
 
+    win.winLogin.on('ready-to-show', () => {
+        closeRegisterWin()
+        win.winLogin.show()
+    })
+
     win.winLogin.on('closed', () => {
         win.winLogin = null
     })
 }
 
-ipcMain.on('open-main-view-win', () => {
-    win.winLogin.close()
+const closeLoginWin = function() {
+    if (win.winLogin !== null) {
+        win.winLogin.close()
+    }
+}
+
+ipcMain.on('close-login-win-open-main-view-win', () => {
+    win.winLogin.hidden()
     createMainViewWin()
+})
+
+ipcMain.on('close-login-win-open-register-win', () => {
+    win.winLogin.hidden()
+    createRegisterWin()
 })
 // ========= Login ==========
 
@@ -148,6 +165,7 @@ const createRegisterWin = function() {
         width: 600,
         height: 400,
         frame: false,
+        show: false,
     }
 
     win.winRegister = new BrowserWindow(options)
@@ -158,10 +176,26 @@ const createRegisterWin = function() {
 
     win.winRegister.loadURL(`file://${__dirname}/renderer/register.html`)
 
+    win.on('ready-to-show', () => {
+        closeLoginWin()
+        win.winRegister.show()
+    })
+
     win.winRegister.on('closed', () => {
         win.winRegister = null
     })
 }
+
+const closeRegisterWin = function() {
+    if (win.winRegister !== null) {
+        win.winRegister.close()
+    }
+}
+
+ipcMain.on('close-register-win-open-login-win', () => {
+    win.winRegister.hidden()
+    createLoginWin()
+})
 // ========= Login ==========
 
 
@@ -182,6 +216,11 @@ const createMainViewWin = function() {
     }
 
     win.winMainView.loadURL(`file://${__dirname}/renderer/mainView.html`)
+
+    win.on('ready-to-show', () => {
+        closeLoginWin()
+        win.winMainView.show()
+    })
 
     win.winMainView.on('closed', () => {
         win.winMainView = null

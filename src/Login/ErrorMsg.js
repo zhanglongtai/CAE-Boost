@@ -44,7 +44,7 @@ class ErrorMsg extends React.Component {
                 <Button
                     type="primary"
                     style={{width: '100%'}}
-                    onClick={() => {navToLogin('form-content')}}
+                    onClick={() => {navToLogin('login-form')}}
                 >
                     返回登录界面
                 </Button>

@@ -6,9 +6,15 @@ import Content from "./Content"
 import Footer from "./Footer"
 import log from "../util/log"
 
+const { ipcRenderer } = window.require("electron")
+
 class MainView extends React.Component {
     constructor() {
         super()
+    }
+    
+    componentDidMount() {
+        ipcRenderer.send('ready-to-show')
     }
 
     render() {
