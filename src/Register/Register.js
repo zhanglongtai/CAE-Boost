@@ -5,7 +5,7 @@ import fetch from "isomorphic-fetch"
 import RegisterForm from "./RegisterForm"
 import MsgContent from "./MsgContent"
 import log from "../util/log"
-import { getloginAPI } from "../api"
+import { getRegisterAPI } from "../api"
 
 const { ipcRenderer } = window.require("electron")
 
@@ -51,6 +51,7 @@ class Register extends React.Component {
     }
 
     navToRegister() {
+        log('click')
         this.setState({
             content: 'form-content',
             submitting: false,
@@ -272,7 +273,19 @@ class Register extends React.Component {
             }
         }
         
-        if (back === '' && back.includes('.')) {
+        if (back === '' || back.includes('.') === false) {
+            this.setState({
+                usernameHelp: '',
+                usernameValidateStatus: '',
+                passwordHelp: '',
+                passwordValidateStatus: '',
+                passwordConfirmHelp: '',
+                passwordConfirmValidateStatus: '',
+                emailHelp: '邮箱格式错误',
+                emailValidateStatus: 'error',
+            })
+            return false
+        } else if(back.split('.')[back.split('.').length - 1] === '') {
             this.setState({
                 usernameHelp: '',
                 usernameValidateStatus: '',
@@ -341,15 +354,24 @@ class Register extends React.Component {
                 emailValidateStatus: '',
             })
 
-            const { username, password, autologin } = this.state
+            const { username, password, email } = this.state
 
-            const url = `${getloginAPI()}?username=${username}&password=${password}`
-            fetch(url)
+            const url = getRegisterAPI()
+
+            const formData = new FormData
+            formData.append('username', username)
+            formData.append('password', password)
+            formData.append('email', email)
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+            })
                 .then((response) => {
                     if (response.status >= 200 && response.status < 300) {
                         return response
                     } else {
-                        if (response.status >= 400) {
+                        if (response.status >= 500) {
                             const error = new Error('服务器错误')
                             error.response = response
                             throw error
@@ -360,18 +382,15 @@ class Register extends React.Component {
                     return response.json()
                 })
                 .then((result) => {
-                    if (result.success) {
-                        if (autologin) {
-                            this.setState({
-                                content: 'msg-content',
-                                msgType: 'success',
-                                msg: '注册成功！',
-                            })
-                        }
-                        ipcRenderer.send('open-main-view-win')
+                    if (result['success']) {
+                        this.setState({
+                            content: 'msg-content',
+                            msgType: 'success',
+                            msg: '注册成功!',
+                        })
                     } else {
-                        switch(result.errMsg) {
-                            case 'UsernameExist':
+                        switch(result['error-msg']) {
+                            case 'username-exist':
                                 this.setState({
                                     submitting: false,
                                     usernameHelp: '用户名已存在',

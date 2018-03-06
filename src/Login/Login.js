@@ -112,7 +112,7 @@ class Login extends React.Component {
                     if (response.status >= 200 && response.status < 300) {
                         return response
                     } else {
-                        if (response.status >= 400) {
+                        if (response.status >= 500) {
                             const error = new Error('服务器错误')
                             error.response = response
                             throw error
@@ -123,7 +123,7 @@ class Login extends React.Component {
                     return response.json()
                 })
                 .then((result) => {
-                    if (result.success) {
+                    if (result['success']) {
                         if (autologin) {
                             ipcRenderer.send('auto-login', {
                                 username: username,
@@ -132,8 +132,8 @@ class Login extends React.Component {
                         }
                         ipcRenderer.send('close-login-win-open-main-view-win')
                     } else {
-                        switch(result.errMsg) {
-                            case 'UsernameNotExist':
+                        switch(result['error-msg']) {
+                            case 'username-not-exist':
                                 this.setState({
                                     submitting: false,
                                     usernameHelp: '用户名不存在',
@@ -142,7 +142,7 @@ class Login extends React.Component {
                                     passwordValidateStatus: '',
                                 })
                                 break
-                            case 'InvalidPassword':
+                            case 'invalid-password':
                                 this.setState({
                                     submitting: false,
                                     usernameHelp: '',

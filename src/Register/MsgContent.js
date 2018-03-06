@@ -11,8 +11,16 @@ class MsgContent extends React.Component {
         super(props)
     }
 
-    openLoginWin() {
-        ipcRenderer.send('close-register-win-open-login-win')
+    componentDidMount() {
+        if (this.props.msgType === 'success') {
+            this.timer = setTimeout(() => {
+                ipcRenderer.send('close-register-win-open-main-view-win')
+            }, 3000)
+        }
+    }
+
+    componentWillUnmount() {
+        clearTimeout(this.timer)
     }
 
     render() {
@@ -72,13 +80,7 @@ class MsgContent extends React.Component {
                         返回注册界面
                     </Button>
                     :
-                    <Button
-                        type="primary"
-                        style={{width: '100%'}}
-                        onClick={this.openLoginWin}
-                    >
-                        返回登录界面
-                    </Button>
+                    <div>正在启动主页面...</div>
                 }
             </div>
         )

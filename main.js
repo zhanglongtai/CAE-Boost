@@ -194,6 +194,11 @@ const closeRegisterWin = function() {
     }
 }
 
+ipcMain.on('close-register-win-open-main-view-win', () => {
+    win.winRegister.hide()
+    createMainViewWin()
+})
+
 ipcMain.on('close-register-win-open-login-win', () => {
     win.winRegister.hide()
     createLoginWin()
@@ -207,6 +212,7 @@ const createMainViewWin = function() {
         width: 1000,
         height: 800,
         frame: false,
+        show: false,
     }
 
     win.winMainView = new BrowserWindow(options)
@@ -221,6 +227,7 @@ const createMainViewWin = function() {
 
     win.winMainView.on('ready-to-show', () => {
         closeLoginWin()
+        closeRegisterWin()
         win.winMainView.show()
     })
 

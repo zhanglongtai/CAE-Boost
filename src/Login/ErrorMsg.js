@@ -31,16 +31,24 @@ class ErrorMsg extends React.Component {
                 }}
                 className='login-form-content'
             >
-                <Alert
-                    message={errMsg}
-                    type="error"
-                    showIcon
+                <div
                     style={{
-                        width: '100%',
-                        height: '100px',
-                        marginBottom: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 0 40px 0',
                     }}
-                />
+                >
+                    <i
+                        className="material-icons"
+                        style={{
+                            fontSize: 40,
+                            margin: '0 10px 0 0',
+                            color: 'gray',
+                        }}
+                    >error_outline</i>
+                    <h3 style={{margin: 0}}>{errMsg}</h3>
+                </div>
                 <Button
                     type="primary"
                     style={{width: '100%'}}
