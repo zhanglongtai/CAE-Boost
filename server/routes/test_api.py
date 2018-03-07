@@ -4,6 +4,7 @@ from flask import (
     jsonify,
     Response,
 )
+import time
 
 test_api = Blueprint('test_api', __name__)
 
@@ -129,8 +130,41 @@ def task_list():
             },
         ]
 
+        time.sleep(2)
+
         return jsonify({
             'task-list': fake_data,
+        })
+
+    def case2():
+        return Response(status=500)
+
+    switch = {
+        1: case1,
+        2: case2,
+    }
+
+    return switch[1]()
+
+
+@test_api.route('/account', methods=['GET'])
+def account():
+    username = request.args.get('username')
+    token = request.args.get('token')
+
+    print('username', username)
+    print('token', token)
+
+    # response case code
+    # 1 - accepted
+    # 2 - server error
+
+    def case1():
+        return jsonify({
+            'balance': '0.00',
+            'voucher': '0.00',
+            'charge-record': [],
+            'consume-record': [],
         })
 
     def case2():

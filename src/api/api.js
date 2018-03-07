@@ -18,9 +18,14 @@ const getResidualAPI = function() {
     return `${protocol}//${host}`
 }
 
+const getAccountAPI = function() {
+    return `${config.baseURL}/account`
+}
+
 export {
     getloginAPI,
     getRegisterAPI,
     getTaskListAPI,
     getResidualAPI,
+    getAccountAPI,
 }

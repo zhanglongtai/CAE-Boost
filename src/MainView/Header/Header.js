@@ -1,10 +1,12 @@
 import React from "react"
 // import PropTypes from "prop-types"
+import fetch from "isomorphic-fetch"
 import Menu from "antd/lib/menu"
 import Dropdown from "antd/lib/dropdown"
 import Icon from "antd/lib/icon"
 import Button from "antd/lib/button"
 
+import { getAccountAPI } from "../../api"
 import log from "../../util/log"
 
 const { ipcRenderer } = window.require("electron")
@@ -14,14 +16,112 @@ class Header extends React.Component {
         super()
 
         this.state = {
+            username: '',
+            token: '',
+            account: {
+                isFetching: true,
+                success: false,
+                balance: '获取中', // 0.00, 获取中, 获取失败
+                voucher: '获取中', // 0.00, 获取中, 获取失败
+                chargeRecord: [],
+                consumeRecord: [],
+            },
             winMax: false,
         }
 
+        this.fetchAccount = this.fetchAccount.bind(this)
         this.maximizeWin = this.maximizeWin.bind(this)
         this.restoreWin = this.restoreWin.bind(this)
+        this.handleProfile = this.handleProfile.bind(this)
     }
 
     componentDidMount() {
+        ipcRenderer.on('user-info', (event, args) => {
+            this.setState({
+                username: args.username,
+                token: args.token,
+            }, () => {
+                this.fetchAccount()
+            })
+        })
+    }
+
+    fetchAccount() {
+        this.setState({
+            account: {
+                isFetching: true,
+                success: false,
+                balance: '获取中',
+                voucher: '获取中',
+                chargeRecord: [],
+                consumeRecord: [],
+            },
+        })
+
+        const { username, token } = this.state
+        const url = `${getAccountAPI()}?username=${username}&token=${token}`
+
+        fetch(url)
+            .then((response) => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response
+                } else {
+                    if (response.status >= 400 && response.status < 500) {
+                        const error = new Error('暂时无法连接服务器')
+                        error.response = response
+                        throw error
+                    } else if (response.status >= 500 ) {
+                        const error = new Error('服务器错误')
+                        error.response = response
+                        throw error
+                    } else {
+                        const error = new Error(response.statusText)
+                        error.response = response
+                        throw error
+                    }
+                }
+            })
+            .then((response) => {
+                return response.json()
+            })
+            .then((result) => {
+                this.setState({
+                    account: {
+                        isFetching: false,
+                        success: true,
+                        balance: result['balance'],
+                        voucher: result['voucher'],
+                        chargeRecord: result['charge-record'],
+                        consumeRecord: result['consume-record'],
+                    },
+                })
+            })
+            .catch((error) => {
+                log(error)
+                if (error.message === 'Failed to fetch') {
+                    this.setState({
+                        account: {
+                            isFetching: false,
+                            success: false,
+                            balance: '获取失败',
+                            voucher: '获取失败',
+                            chargeRecord: [],
+                            consumeRecord: [],
+                        },
+                    })
+                } else {
+                    this.setState({
+                        account: {
+                            isFetching: false,
+                            success: false,
+                            balance: '获取失败',
+                            voucher: '获取失败',
+                            chargeRecord: [],
+                            consumeRecord: [],
+                        },
+                    })
+                }
+            })
     }
 
     minimizeWin() {
@@ -44,6 +144,22 @@ class Header extends React.Component {
 
     closeWin() {
         ipcRenderer.send('close-main-view-win')
+    }
+
+    handleProfile(menu) {
+        switch (menu.key) {
+            case "1":
+            case "2":
+                log(menu.key)
+                break
+            case "3":
+                this.logout()
+                break
+        }
+    }
+
+    logout() {
+        ipcRenderer.send('close-main-view-win-open-login-win')
     }
 
     render() {
@@ -111,10 +227,10 @@ class Header extends React.Component {
             },
         }
 
-        const { winMax } = this.state
+        const { username, winMax, account } = this.state
 
         const menu = (
-            <Menu>
+            <Menu onClick={this.handleProfile}>
                 <Menu.Item key="0">修改密码</Menu.Item>
                 <Menu.Item key="1">清单</Menu.Item>
                 <Menu.Divider />
@@ -125,7 +241,7 @@ class Header extends React.Component {
         const dropdown = (
             <Dropdown overlay={menu} trigger={['click']}>
                 <div>
-                    username <Icon type="down" />
+                    {username} <Icon type="down" />
                 </div>
             </Dropdown>
         )
@@ -187,12 +303,22 @@ class Header extends React.Component {
                         <img src='img/DlakeCloud.svg' style={styles.logo} />
                     </div>
                     <div style={styles.contentContainer}>
+                        <img
+                            style={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: '50%',
+                                border: '2px solid #fafafa',
+                            }}
+                            alt="avatar"
+                            src='img/ic_account_circle_48px_blue500.svg'
+                        />
                         <div style={styles.accountContainer}>{ dropdown }</div>
                         <div style={styles.balanceContainer}>
-                            余额: 0.00&nbsp;&nbsp;<span><Button size='small'>充值</Button></span>
+                            余额: {account.balance}&nbsp;&nbsp;<span><Button size='small'>充值</Button></span>
                         </div>
                         <div style={styles.voucherContainer}>
-                            代金卷: 0.00
+                            代金卷: {account.voucher}
                         </div>
                         <div style={styles.otherContainer}>
                             <div

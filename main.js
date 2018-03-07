@@ -135,6 +135,7 @@ const createLoginWin = function() {
 
     win.winLogin.on('ready-to-show', () => {
         closeRegisterWin()
+        closeMainView()
         win.winLogin.show()
     })
 
@@ -247,6 +248,17 @@ const createMainViewWin = function() {
         win.winMainView = null
     })
 }
+
+const closeMainView = function() {
+    if (win.winMainView !== null) {
+        win.winMainView.close()
+    }
+}
+
+ipcMain.on('close-main-view-win-open-login-win', () => {
+    win.winMainView.hide()
+    createLoginWin()
+})
 
 ipcMain.on('minimize-main-view-win', () => {
     win.winMainView.minimize()
