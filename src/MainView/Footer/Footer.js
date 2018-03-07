@@ -16,7 +16,6 @@ class Footer extends React.Component {
     render() {
         const styles = {
             container: {
-                // WebkitAppRegion: 'drag',
                 width: 1000,
                 height: 49,
                 display: 'flex',

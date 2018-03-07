@@ -7,6 +7,8 @@ const {
 
 const config = {
     env: 'dev', // 'dev' or 'prod'
+    username: '',
+    token: '',
 }
 
 let reactDevtool = null
@@ -147,7 +149,10 @@ const closeLoginWin = function() {
     }
 }
 
-ipcMain.on('close-login-win-open-main-view-win', () => {
+ipcMain.on('close-login-win-open-main-view-win', (event, args) => {
+    config.username = args.username
+    config.token = args.token
+
     win.winLogin.hide()
     createMainViewWin()
 })
@@ -194,7 +199,10 @@ const closeRegisterWin = function() {
     }
 }
 
-ipcMain.on('close-register-win-open-main-view-win', () => {
+ipcMain.on('close-register-win-open-main-view-win', (event, args) => {
+    config.username = args.username
+    config.token = args.token
+
     win.winRegister.hide()
     createMainViewWin()
 })
@@ -228,6 +236,10 @@ const createMainViewWin = function() {
     win.winMainView.on('ready-to-show', () => {
         closeLoginWin()
         closeRegisterWin()
+        win.winMainView.send('user-info', {
+            username: config.username,
+            token: config.token,
+        })
         win.winMainView.show()
     })
 

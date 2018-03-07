@@ -130,7 +130,10 @@ class Login extends React.Component {
                                 password: password,
                             })
                         }
-                        ipcRenderer.send('close-login-win-open-main-view-win')
+                        ipcRenderer.send('close-login-win-open-main-view-win', {
+                            username: username,
+                            token: result['token'],
+                        })
                     } else {
                         switch(result['error-msg']) {
                             case 'username-not-exist':

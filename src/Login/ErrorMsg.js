@@ -1,7 +1,5 @@
 import React from "react"
 import PropTypes from "prop-types"
-import Icon from "antd/lib/icon"
-import Alert from "antd/lib/alert"
 import Button from "antd/lib/button"
 
 import log from "../util/log"

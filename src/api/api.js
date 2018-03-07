@@ -8,6 +8,10 @@ const getRegisterAPI = function() {
     return `${config.baseURL}/register`
 }
 
+const getTaskListAPI = function() {
+    return `${config.baseURL}/task-list`
+}
+
 const getResidualAPI = function() {
     const protocol = config.baseURL.split("/")[0]
     const host = config.baseURL.split("/")[2]
@@ -17,5 +21,6 @@ const getResidualAPI = function() {
 export {
     getloginAPI,
     getRegisterAPI,
+    getTaskListAPI,
     getResidualAPI,
 }

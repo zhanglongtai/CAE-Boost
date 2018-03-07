@@ -30,6 +30,7 @@ class Register extends React.Component {
             emailValidateStatus: '',
             msgType: '',
             msg: '',
+            token: '',
         }
 
         this.navToRegister = this.navToRegister.bind(this)
@@ -387,6 +388,7 @@ class Register extends React.Component {
                             content: 'msg-content',
                             msgType: 'success',
                             msg: '注册成功!',
+                            token: result['token'],
                         })
                     } else {
                         switch(result['error-msg']) {
@@ -463,6 +465,7 @@ class Register extends React.Component {
             emailValidateStatus,
             msgType,
             msg,
+            token,
         } = this.state
 
         return (
@@ -490,8 +493,10 @@ class Register extends React.Component {
                     />
                     :
                     <MsgContent
+                        username={username}
                         msgType={msgType}
                         msg={msg}
+                        token={token}
                         navToRegister={this.navToRegister}
                     />
                 }

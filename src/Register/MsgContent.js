@@ -12,9 +12,18 @@ class MsgContent extends React.Component {
     }
 
     componentDidMount() {
-        if (this.props.msgType === 'success') {
+        const {
+            username,
+            msgType,
+            token,
+        } = this.props
+
+        if (msgType === 'success') {
             this.timer = setTimeout(() => {
-                ipcRenderer.send('close-register-win-open-main-view-win')
+                ipcRenderer.send('close-register-win-open-main-view-win', {
+                    username: username,
+                    token: token,
+                })
             }, 3000)
         }
     }
@@ -88,8 +97,10 @@ class MsgContent extends React.Component {
 }
 
 MsgContent.propTypes = {
+    username: PropTypes.string.isRequired,
     msgType: PropTypes.string.isRequired,
     msg: PropTypes.string.isRequired,
+    token: PropTypes.string.isRequired,
     navToRegister: PropTypes.func.isRequired,
 }
 
