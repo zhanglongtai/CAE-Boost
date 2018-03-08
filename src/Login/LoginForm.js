@@ -31,6 +31,7 @@ class LoginForm extends React.Component {
             password,
             passwordHelp,
             passwordValidateStatus,
+            navToRetrievePassword,
             setUsername,
             setPassword,
             setAutologin,
@@ -73,7 +74,7 @@ class LoginForm extends React.Component {
                         onChange={setAutologin}
                     >自动登录</Checkbox>
                     <a
-                        href=""
+                        onClick={navToRetrievePassword}
                         style={{float: 'right'}}
                     >忘记密码</a>
                     { submitting ?
@@ -110,6 +111,7 @@ LoginForm.propTypes = {
     password: PropTypes.string.isRequired,
     passwordHelp: PropTypes.string.isRequired,
     passwordValidateStatus: PropTypes.string.isRequired,
+    navToRetrievePassword: PropTypes.func.isRequired,
     setUsername: PropTypes.func.isRequired,
     setPassword: PropTypes.func.isRequired,
     setAutologin: PropTypes.func.isRequired,

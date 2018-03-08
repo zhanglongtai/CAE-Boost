@@ -4,6 +4,7 @@ import fetch from "isomorphic-fetch"
 
 import LoginForm from "./LoginForm"
 import ErrorMsg from "./ErrorMsg"
+import RetrievePassword from "./RetrievePassword"
 import log from "../util/log"
 import { getloginAPI } from "../api"
 
@@ -14,7 +15,7 @@ class Login extends React.Component {
         super()
 
         this.state = {
-            content: 'login-form', // 'login-form', 'error-msg'
+            content: 'login-form', // 'login-form', 'error-msg', 'retrieve-password'
             submitting: false,
             autologin: false,
             username: '',
@@ -27,6 +28,7 @@ class Login extends React.Component {
         }
 
         this.navToLogin = this.navToLogin.bind(this)
+        this.navToRetrievePassword = this.navToRetrievePassword.bind(this)
         this.setUsername = this.setUsername.bind(this)
         this.setPassword = this.setPassword.bind(this)
         this.setAutologin = this.setAutologin.bind(this)
@@ -42,6 +44,12 @@ class Login extends React.Component {
         this.setState({
             content: 'login-form',
             submitting: false,
+        })
+    }
+
+    navToRetrievePassword() {
+        this.setState({
+            content: 'retrieve-password',
         })
     }
 
@@ -208,29 +216,40 @@ class Login extends React.Component {
             errMsg,
         } = this.state
 
+        let showContent = null
+        switch (content) {
+            case 'login-form':
+                showContent = <LoginForm
+                    submitting={submitting}
+                    autologin={autologin}
+                    username={username}
+                    usernameHelp={usernameHelp}
+                    usernameValidateStatus={usernameValidateStatus}
+                    password={password}
+                    passwordHelp={passwordHelp}
+                    passwordValidateStatus={passwordValidateStatus}
+                    navToRetrievePassword={this.navToRetrievePassword}
+                    setUsername={this.setUsername}
+                    setPassword={this.setPassword}
+                    setAutologin={this.setAutologin}
+                    loginSubmit={this.loginSubmit}
+                />
+                break
+            case 'error-msg':
+                showContent = <ErrorMsg
+                    errMsg={errMsg}
+                    navToLogin={this.navToLogin}
+                />
+                break
+            case 'retrieve-password':
+                showContent = <RetrievePassword
+                    navToLogin={this.navToLogin}
+                />
+        }
+
         return (
             <div className='login' style={styles.container}>
-                { content === 'login-form' ?
-                    <LoginForm
-                        submitting={submitting}
-                        autologin={autologin}
-                        username={username}
-                        usernameHelp={usernameHelp}
-                        usernameValidateStatus={usernameValidateStatus}
-                        password={password}
-                        passwordHelp={passwordHelp}
-                        passwordValidateStatus={passwordValidateStatus}
-                        setUsername={this.setUsername}
-                        setPassword={this.setPassword}
-                        setAutologin={this.setAutologin}
-                        loginSubmit={this.loginSubmit}
-                    />
-                    :
-                    <ErrorMsg
-                        errMsg={errMsg}
-                        navToLogin={this.navToLogin}
-                    />
-                }
+                { showContent }
             </div>
         )
     }

@@ -176,3 +176,31 @@ def account():
     }
 
     return switch[1]()
+
+
+@test_api.route('/password', methods=['GET', 'POST'])
+def password():
+    if request.method == 'GET':
+        username = request.args.get('username')
+
+        print('username', username)
+
+        # response case code
+        # 1 - accepted
+        # 2 - server error
+
+        def case1():
+            return jsonify({
+                'success': True,
+                'obscure-email': 'ex*******mail.com',
+            })
+
+        def case2():
+            return Response(status=500)
+
+        switch = {
+            1: case1,
+            2: case2,
+        }
+
+        return switch[2]()

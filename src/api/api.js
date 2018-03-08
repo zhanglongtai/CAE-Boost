@@ -22,10 +22,15 @@ const getAccountAPI = function() {
     return `${config.baseURL}/account`
 }
 
+const getPasswordAPI = function() {
+    return `${config.baseURL}/password`
+}
+
 export {
     getloginAPI,
     getRegisterAPI,
     getTaskListAPI,
     getResidualAPI,
     getAccountAPI,
+    getPasswordAPI,
 }

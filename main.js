@@ -6,7 +6,7 @@ const {
 } = require("electron")
 
 const config = {
-    env: 'prod', // 'dev' or 'prod'
+    env: 'dev', // 'dev' or 'prod'
     username: '',
     token: '',
 }
@@ -119,6 +119,8 @@ const createLoginWin = function() {
     const options = {
         width: 640,
         height: 440,
+        minWidth: 640,
+        minHeight: 440,
         show: false,
         // frame: false,
     }
@@ -170,6 +172,8 @@ const createRegisterWin = function() {
     const options = {
         width: 640,
         height: 640,
+        minWidth: 640,
+        minHeight: 640,
         // frame: false,
         show: false,
     }

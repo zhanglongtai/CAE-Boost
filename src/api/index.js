@@ -4,6 +4,7 @@ import {
     getResidualAPI,
     getTaskListAPI,
     getAccountAPI,
+    getPasswordAPI,
 } from "./api"
 
 export {
@@ -12,4 +13,5 @@ export {
     getResidualAPI,
     getTaskListAPI,
     getAccountAPI,
+    getPasswordAPI,
 }
