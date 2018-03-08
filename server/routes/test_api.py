@@ -187,7 +187,8 @@ def password():
 
         # response case code
         # 1 - accepted
-        # 2 - server error
+        # 2 - username not exist
+        # 3 - server error
 
         def case1():
             return jsonify({
@@ -196,11 +197,18 @@ def password():
             })
 
         def case2():
+            return jsonify({
+                'success': False,
+                'error-msg': 'username-not-exist',
+            })
+
+        def case3():
             return Response(status=500)
 
         switch = {
             1: case1,
             2: case2,
+            3: case3,
         }
 
         return switch[2]()

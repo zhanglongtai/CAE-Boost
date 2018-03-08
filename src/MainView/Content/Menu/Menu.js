@@ -25,8 +25,8 @@ class Menu extends React.Component {
         this.props.setContent(index)
     }
 
-    openAddTask() {
-        ipcRenderer.send('open-add-task')
+    openAddTaskWin() {
+        ipcRenderer.send('open-add-task-win')
     }
 
     render() {
@@ -58,7 +58,7 @@ class Menu extends React.Component {
                         type="primary"
                         icon="plus-circle"
                         size="default"
-                        onClick={this.openAddTask}
+                        onClick={this.openAddTaskWin}
                     >新增任务</Button>
                 </div>
                 <RadioGroup onChange={this.handleChange} value={this.props.contentIndex}>

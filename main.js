@@ -28,6 +28,7 @@ const win = {
     winMainView: null,
     winTestDownload: null,
     winAddTask: null,
+    winCharge: null,
 }
 
 
@@ -290,6 +291,7 @@ const createAddTaskWin = function() {
         width: 600,
         height: 800,
         frame: false,
+        // resizable: false,
         parent: win.winMainView,
         modal: true,
     }
@@ -307,11 +309,45 @@ const createAddTaskWin = function() {
     })
 }
 
-ipcMain.on('open-add-task', () => {
+ipcMain.on('open-add-task-win', () => {
     createAddTaskWin()
 })
 
-ipcMain.on('close-add-task', () => {
+ipcMain.on('close-add-task-win', () => {
     win.winAddTask.close()
 })
 // ========= AddTask ==========
+
+
+// ========= Charge ==========
+const createChargeWin = function() {
+    const options = {
+        width: 500,
+        height: 400,
+        frame: false,
+        // resizable: false,
+        parent: win.winMainView,
+        modal: true,
+    }
+
+    win.winCharge = new BrowserWindow(options)
+
+    if (config.env === 'dev') {
+        win.winCharge.webContents.openDevTools()
+    }
+
+    win.winCharge.loadURL(`file://${__dirname}/renderer/charge.html`)
+
+    win.winCharge.on('closed', () => {
+        win.winCharge = null
+    })
+}
+
+ipcMain.on('open-charge-win', () => {
+    createChargeWin()
+})
+
+ipcMain.on('close-charge-win', () => {
+    win.winCharge.close()
+})
+// ========= Charge ==========

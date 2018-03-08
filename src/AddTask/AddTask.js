@@ -123,8 +123,8 @@ class AddTask extends React.Component {
         })
     }
 
-    closeAddTask() {
-        ipcRenderer.send('close-add-task')
+    closeAddTaskWin() {
+        ipcRenderer.send('close-add-task-win')
     }
 
     render() {
@@ -230,7 +230,7 @@ class AddTask extends React.Component {
                 >
                     <h2 style={{margin: 0}}>DlakeCloud</h2>
                     <div
-                        onClick={this.closeAddTask}
+                        onClick={this.closeAddTaskWin}
                         style={{
                             width: '30px',
                             height: '30px',

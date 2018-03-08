@@ -6,6 +6,7 @@ module.exports = {
         register: './src/registerIndex.js',
         mainView: './src/mainViewIndex.js',
         addTask: './src/addTaskIndex.js',
+        charge: './src/chargeIndex.js',
     },
   
     output: {

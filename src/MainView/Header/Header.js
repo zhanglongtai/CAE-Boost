@@ -146,6 +146,10 @@ class Header extends React.Component {
         ipcRenderer.send('close-main-view-win')
     }
 
+    openChargeWin() {
+        ipcRenderer.send('open-charge-win')
+    }
+
     handleProfile(menu) {
         switch (menu.key) {
             case "1":
@@ -233,7 +237,7 @@ class Header extends React.Component {
         const menu = (
             <Menu onClick={this.handleProfile}>
                 <Menu.Item key="0">修改密码</Menu.Item>
-                <Menu.Item key="1">清单</Menu.Item>
+                <Menu.Item key="1">查看账单</Menu.Item>
                 <Menu.Divider />
                 <Menu.Item key="3">注销</Menu.Item>
             </Menu>
@@ -316,7 +320,7 @@ class Header extends React.Component {
                         />
                         <div style={styles.accountContainer}>{ dropdown }</div>
                         <div style={styles.balanceContainer}>
-                            余额: {account.balance}&nbsp;&nbsp;<span><Button size='small'>充值</Button></span>
+                            余额: {account.balance}&nbsp;&nbsp;<span><Button size='small' onClick={this.openChargeWin}>充值</Button></span>
                         </div>
                         <div style={styles.voucherContainer}>
                             代金卷: {account.voucher}
