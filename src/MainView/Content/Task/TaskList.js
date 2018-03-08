@@ -31,14 +31,17 @@ class TaskList extends React.Component {
         const {
             content,
             taskList,
+            taskContainerWidth,
         } = this.props
 
         const styles = {
             container: {
-                minWidth: 1000,
-                width: '100%',
-                height: 620,
-                transitionDuration: '1s',
+                // minWidth: 1000,
+                // width: '100%',
+                // display: content === 'task-list' ? '' : 'none',
+                minWidth: taskContainerWidth,
+                minHeight: 620,
+                transitionDuration: '0.5s',
                 transform: content === 'task-list' ? '' : 'translate(-100%)',
             },
         }
@@ -178,6 +181,7 @@ class TaskList extends React.Component {
 }
 
 TaskList.propTypes = {
+    taskContainerWidth: PropTypes.number.isRequired,
     content: PropTypes.string.isRequired,
     taskList: PropTypes.array.isRequired,
     setContent: PropTypes.func.isRequired,

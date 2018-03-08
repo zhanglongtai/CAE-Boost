@@ -32,8 +32,10 @@ class Content extends React.Component {
     render() {
         const styles = {
             container: {
-                width: 1000,
-                height: 700,
+                flexGrow: 1,
+                minWidth: 1000,
+                width: '100%',
+                minHeight: 700,
                 display: 'flex',
                 flexDirection: 'column',
             },

@@ -70,6 +70,7 @@ class Task extends React.Component {
                 list: [],
                 errorMsg: '',
             },
+            taskContainerWidth: 1000,
             username: '',
             token: '',
             taskID: '',
@@ -89,6 +90,15 @@ class Task extends React.Component {
             }, () => {
                 this.fetchTaskList()
             })
+        })
+
+        window.addEventListener('resize', () => {
+            const taskContainer = document.querySelector('.task')
+            if (taskContainer !== null) {
+                this.setState({
+                    taskContainerWidth: taskContainer.clientWidth,
+                })
+            }
         })
     }
 
@@ -178,13 +188,14 @@ class Task extends React.Component {
     }
 
     render() {
-        const { content, taskID, taskName, taskList } = this.state
+        const { content, taskID, taskName, taskList, taskContainerWidth } = this.state
 
         const styles = {
             container: {
+                flexGrow: 1,
                 minWidth: 1000,
                 width: '100%',
-                height: 620,
+                minHeight: 620,
                 display: 'flex',
                 overflowX: 'hidden',
             },
@@ -196,10 +207,10 @@ class Task extends React.Component {
                 <div
                     className="task-list-loading-container"
                     style={{
-                        minWidth: 1000,
-                        width: '100%',
-                        height: 620,
-                        margin: '20px',
+                        // minWidth: 1000,
+                        // width: '100%',
+                        minWidth: taskContainerWidth,
+                        minHeight: 620,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -211,6 +222,7 @@ class Task extends React.Component {
         } else {
             if (taskList.success) {
                 taskListContent = <TaskList
+                    taskContainerWidth={taskContainerWidth}
                     taskList={taskList.list}
                     content={content}
                     setContent={this.setContent}
@@ -220,9 +232,10 @@ class Task extends React.Component {
                 taskListContent = (
                     <div
                         style={{
-                            minWidth: 1000,
-                            width: '100%',
-                            height: 620,
+                            // minWidth: 1000,
+                            // width: '100%',
+                            minWidth: taskContainerWidth,
+                            minHeight: 620,
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
@@ -271,6 +284,7 @@ class Task extends React.Component {
                 /> */}
                 { taskListContent }
                 <TaskDetail
+                    taskContainerWidth={taskContainerWidth}
                     setContent={this.setContent}
                     content={content}
                     taskName={taskName}

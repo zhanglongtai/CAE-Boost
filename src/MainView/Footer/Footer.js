@@ -16,7 +16,8 @@ class Footer extends React.Component {
     render() {
         const styles = {
             container: {
-                width: 1000,
+                minWidth: 1000,
+                width: '100%',
                 height: 49,
                 display: 'flex',
                 alignItems: 'center',

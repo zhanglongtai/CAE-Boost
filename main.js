@@ -6,7 +6,7 @@ const {
 } = require("electron")
 
 const config = {
-    env: 'dev', // 'dev' or 'prod'
+    env: 'prod', // 'dev' or 'prod'
     username: '',
     token: '',
 }
@@ -117,8 +117,8 @@ ipcMain.on('download-file', (event, url) => {
 // ========= Login ==========
 const createLoginWin = function() {
     const options = {
-        width: 600,
-        height: 400,
+        width: 640,
+        height: 440,
         show: false,
         // frame: false,
     }
@@ -168,8 +168,8 @@ ipcMain.on('close-login-win-open-register-win', () => {
 // ========= Register ==========
 const createRegisterWin = function() {
     const options = {
-        width: 600,
-        height: 600,
+        width: 640,
+        height: 640,
         // frame: false,
         show: false,
     }
@@ -220,6 +220,8 @@ const createMainViewWin = function() {
     const options = {
         width: 1000,
         height: 800,
+        minWidth: 1000,
+        minHeight: 1000,
         frame: false,
         show: false,
     }

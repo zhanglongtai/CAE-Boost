@@ -20,8 +20,12 @@ class MainView extends React.Component {
     render() {
         const styles = {
             container: {
-                width: 1000,
-                height: 800,
+                minWidth: 1000,
+                width: '100%',
+                minHeight: 800,
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
             },
         }
 

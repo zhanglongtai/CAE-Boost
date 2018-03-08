@@ -21,15 +21,18 @@ class TaskDetail extends React.Component {
             content,
             taskName,
             taskID,
+            taskContainerWidth,
         } = this.props
 
         const styles = {
             container: {
-                minWidth: 1000,
-                width: '100%',
-                height: 620,
-                display: 'flex',
-                transitionDuration: '1s',
+                // minWidth: 1000,
+                // width: '100%',
+                display: content === 'task-list' ? 'none' : 'flex',
+                minWidth: taskContainerWidth,
+                minHeight: 620,
+                // display: 'flex',
+                transitionDuration: '0.5s',
                 transform: content === 'task-list' ? '' : 'translate(-100%)',
             },
             navContainer: {
@@ -40,7 +43,8 @@ class TaskDetail extends React.Component {
                 justifyContent: 'center',
             },
             residualContainer: {
-                maxWidth: '90%',
+                flexGrow: 1,
+                // maxWidth: '90%',
                 minWidth: '900px',
                 display: 'flex',
                 alignItems: 'center',
@@ -86,6 +90,7 @@ class TaskDetail extends React.Component {
 }
 
 TaskDetail.propTypes = {
+    taskContainerWidth: PropTypes.number.isRequired,
     setContent: PropTypes.func.isRequired,
     content: PropTypes.string.isRequired,
     taskName: PropTypes.string.isRequired,
