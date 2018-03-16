@@ -6,7 +6,7 @@ const {
 } = require("electron")
 
 const config = {
-    env: 'dev', // 'dev' or 'prod'
+    env: 'prod', // 'dev' or 'prod'
     username: '',
     token: '',
 }
@@ -28,6 +28,7 @@ const win = {
     winMainView: null,
     winTestDownload: null,
     winAddTask: null,
+    winNodeTypeSelector: null,
     winCharge: null,
 }
 
@@ -217,7 +218,7 @@ ipcMain.on('close-register-win-open-login-win', () => {
     win.winRegister.hide()
     createLoginWin()
 })
-// ========= Login ==========
+// ========= Register ==========
 
 
 // ========= MainView ==========
@@ -226,7 +227,7 @@ const createMainViewWin = function() {
         width: 1000,
         height: 800,
         minWidth: 1000,
-        minHeight: 1000,
+        minHeight: 800,
         frame: false,
         show: false,
     }
@@ -244,7 +245,7 @@ const createMainViewWin = function() {
     win.winMainView.on('ready-to-show', () => {
         closeLoginWin()
         closeRegisterWin()
-        win.winMainView.send('user-info', {
+        win.winMainView.webContents.send('user-info', {
             username: config.username,
             token: config.token,
         })
@@ -317,6 +318,40 @@ ipcMain.on('close-add-task-win', () => {
     win.winAddTask.close()
 })
 // ========= AddTask ==========
+
+
+// ========== NodeTypeSelector ==========
+const createNodeTypeSelectorWin = function() {
+    const options = {
+        width: 800,
+        height: 400,
+        frame: false,
+        // resizable: false,
+        parent: win.winAddTask,
+        modal: true,
+    }
+
+    win.winNodeTypeSelector = new BrowserWindow(options)
+
+    if (config.env === 'dev') {
+        win.winNodeTypeSelector.webContents.openDevTools()
+    }
+
+    win.winNodeTypeSelector.loadURL(`file://${__dirname}/renderer/nodeTypeSelector.html`)
+
+    win.winNodeTypeSelector.on('closed', () => {
+        win.winNodeTypeSelector = null
+    })
+}
+
+ipcMain.on('open-node-type-selector-win', () => {
+    createNodeTypeSelectorWin()
+})
+
+ipcMain.on('close-node-type-selector-win', () => {
+    win.winNodeTypeSelector.close()
+})
+// ========== NodeTypeSelector ==========
 
 
 // ========= Charge ==========

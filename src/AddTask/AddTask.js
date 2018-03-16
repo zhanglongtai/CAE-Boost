@@ -27,7 +27,9 @@ class AddTask extends React.Component {
               filePath: '../../',
             **/
             fileList: [],
-            cpuNum: 0,
+            nodeTypeIndex: 0,
+            nodeType: '',
+            nodeNum: 0,
         }
 
         this.setTaskName = this.setTaskName.bind(this)
@@ -36,7 +38,8 @@ class AddTask extends React.Component {
         this.handleDrop = this.handleDrop.bind(this)
         this.removeFile = this.removeFile.bind(this)
         this.handleInputChange = this.handleInputChange.bind(this)
-        this.setCpuNum = this.setCpuNum.bind(this)
+        this.setNodeType = this.setNodeType.bind(this)
+        this.setNodeNum = this.setNodeNum.bind(this)
     }
 
     componentDidMount() {
@@ -117,9 +120,16 @@ class AddTask extends React.Component {
         })
     }
 
-    setCpuNum(num) {
+    setNodeType(index, type) {
         this.setState({
-            cpuNum: num,
+            nodeTypeIndex: index,
+            nodeType: type,
+        })
+    }
+
+    setNodeNum(num) {
+        this.setState({
+            nodeNum: num,
         })
     }
 
@@ -166,7 +176,7 @@ class AddTask extends React.Component {
             },
         }
 
-        const { dragging, fileList } = this.state
+        const { dragging, fileList, nodeType } = this.state
 
         const dropzone = (
             <div
@@ -279,8 +289,19 @@ class AddTask extends React.Component {
                         </div>
                     </div>
                     <div style={styles.itemContainer}>
-                        <h4>CPU个数</h4>
-                        <InputNumber min={1} max={100} defaultValue={8} onChange={this.setCpuNum} />
+                        <h4>节点类型</h4>
+                        <div
+                            style={{
+                                display: 'flex',
+                            }}
+                        >
+                            <p>{nodeType}</p>
+                            <Button>选择节点类型</Button>
+                        </div>
+                    </div>
+                    <div style={styles.itemContainer}>
+                        <h4>节点个数</h4>
+                        <InputNumber min={1} max={100} defaultValue={8} onChange={this.setNodeNum} />
                     </div>
                 </div>
                 <div
