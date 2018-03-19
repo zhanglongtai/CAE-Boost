@@ -6,13 +6,14 @@ import Select from "antd/lib/select"
 import InputNumber from "antd/lib/input-number"
 import Button from "antd/lib/button"
 
+import NodeTypeItem from "./NodeTypeItem"
 import log from "../util/log"
 
 const Option = Select.Option
 
 const { ipcRenderer } = window.require("electron")
 
-const resourceCategoryList = [
+const nodeTypeList = [
     {
         name: "GPU计算型 (gn5)",
         price: {
@@ -98,6 +99,9 @@ class NodeTypeSelector extends React.Component {
             nodeTypeIndex: 0,
             nodeType: '',
         }
+
+        this.setNodeType = this.setNodeType.bind(this)
+        this.submitNodeType = this.submitNodeType.bind(this)
     }
 
     componentDidMount() {
@@ -105,6 +109,13 @@ class NodeTypeSelector extends React.Component {
 
     closeNodeTypeSelectorWin() {
         ipcRenderer.send('close-node-type-selector-win')
+    }
+
+    submitNodeType() {
+        ipcRenderer.send('submit-node-type', {
+            nodeTypeIndex: this.state.nodeTypeIndex,
+            nodeType: this.state.nodeType,
+        })
     }
 
     setNodeType(index, type) {
@@ -117,7 +128,7 @@ class NodeTypeSelector extends React.Component {
     render() {
         const styles = {
             container: {
-                width: 800,
+                width: 900,
                 height: 400,
                 display: 'flex',
                 flexDirection: 'column',
@@ -132,9 +143,9 @@ class NodeTypeSelector extends React.Component {
             },
             content: {
                 width: '100%',
-                height: '700px',
+                height: '300px',
                 display: 'flex',
-                flexDirection: 'column',
+                justifyContent: 'space-between',
                 alignItems: 'center',
             },
             itemContainer: {
@@ -189,17 +200,17 @@ class NodeTypeSelector extends React.Component {
                 />
                 <div className='node-type-selector-content' style={styles.content}>
                     {
-                        resourceCategoryList.map((item, index) => {
-                            return <ResourceItem
+                        nodeTypeList.map((item, index) => {
+                            return <NodeTypeItem
                                 key={index}
-                                resourceIndex={index}
+                                nodeTypeIndex={index + 1}
                                 name={item.name}
                                 selected={nodeTypeIndex === index + 1}
                                 price={item.price}
                                 memory={item.memory}
                                 cpu={item.cpu}
                                 network={item.network}
-                                setResource={this.setResource}
+                                setNodeType={this.setNodeType}
                             />
                         })
                     }
@@ -216,7 +227,7 @@ class NodeTypeSelector extends React.Component {
                     className='node-type-selector-footer'
                     style={styles.footer}
                 >
-                    <Button type="primary">提交</Button>
+                    <Button type="primary" onClick={this.submitNodeType}>确认</Button>
                 </div>
             </div>
         )

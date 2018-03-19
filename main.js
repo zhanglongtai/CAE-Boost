@@ -6,7 +6,7 @@ const {
 } = require("electron")
 
 const config = {
-    env: 'prod', // 'dev' or 'prod'
+    env: 'dev', // 'dev' or 'prod'
     username: '',
     token: '',
 }
@@ -290,7 +290,7 @@ ipcMain.on('close-main-view-win', () => {
 const createAddTaskWin = function() {
     const options = {
         width: 600,
-        height: 800,
+        height: 870,
         frame: false,
         // resizable: false,
         parent: win.winMainView,
@@ -323,7 +323,7 @@ ipcMain.on('close-add-task-win', () => {
 // ========== NodeTypeSelector ==========
 const createNodeTypeSelectorWin = function() {
     const options = {
-        width: 800,
+        width: 900,
         height: 400,
         frame: false,
         // resizable: false,
@@ -349,6 +349,11 @@ ipcMain.on('open-node-type-selector-win', () => {
 })
 
 ipcMain.on('close-node-type-selector-win', () => {
+    win.winNodeTypeSelector.close()
+})
+
+ipcMain.on('submit-node-type', (event, args) => {
+    win.winAddTask.webContents.send('submit-node-type', args)
     win.winNodeTypeSelector.close()
 })
 // ========== NodeTypeSelector ==========

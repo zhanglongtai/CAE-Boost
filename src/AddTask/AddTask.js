@@ -43,6 +43,9 @@ class AddTask extends React.Component {
     }
 
     componentDidMount() {
+        ipcRenderer.on('submit-node-type', (event, args) => {
+            this.setNodeType(args.nodeTypeIndex, args.nodeType)
+        })
     }
 
     setTaskName(name) {
@@ -137,11 +140,15 @@ class AddTask extends React.Component {
         ipcRenderer.send('close-add-task-win')
     }
 
+    openNodeTypeSelector() {
+        ipcRenderer.send('open-node-type-selector-win')
+    }
+
     render() {
         const styles = {
             container: {
                 width: 600,
-                height: 800,
+                height: 870,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -155,7 +162,7 @@ class AddTask extends React.Component {
             },
             content: {
                 width: '100%',
-                height: '700px',
+                height: '770px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -293,10 +300,11 @@ class AddTask extends React.Component {
                         <div
                             style={{
                                 display: 'flex',
+                                alignItems: 'center',
                             }}
                         >
-                            <p>{nodeType}</p>
-                            <Button>选择节点类型</Button>
+                            <p style={{margin: '0 20px 0 0'}}>{nodeType}</p>
+                            <Button onClick={this.openNodeTypeSelector}>选择节点类型</Button>
                         </div>
                     </div>
                     <div style={styles.itemContainer}>

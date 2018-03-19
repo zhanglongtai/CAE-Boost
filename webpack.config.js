@@ -7,6 +7,7 @@ module.exports = {
         mainView: './src/mainViewIndex.js',
         addTask: './src/addTaskIndex.js',
         charge: './src/chargeIndex.js',
+        nodeTypeSelector: './src/nodeTypeSelectorIndex.js',
     },
   
     output: {
