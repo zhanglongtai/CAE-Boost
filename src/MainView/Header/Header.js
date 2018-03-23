@@ -6,7 +6,7 @@ import Dropdown from "antd/lib/dropdown"
 import Icon from "antd/lib/icon"
 import Button from "antd/lib/button"
 
-import { getAccountAPI } from "../../api"
+import { getBillAPI } from "../../api"
 import log from "../../util/log"
 
 const { ipcRenderer } = window.require("electron")
@@ -17,7 +17,7 @@ class Header extends React.Component {
 
         this.state = {
             username: '',
-            token: '',
+            accessToken: '',
             account: {
                 isFetching: true,
                 success: false,
@@ -37,9 +37,11 @@ class Header extends React.Component {
 
     componentDidMount() {
         ipcRenderer.on('user-info', (event, args) => {
+            log('user-info')
+            const { username, accessToken } = args
             this.setState({
-                username: args.username,
-                token: args.token,
+                username: username,
+                accessToken: accessToken,
             }, () => {
                 this.fetchAccount()
             })
@@ -58,10 +60,15 @@ class Header extends React.Component {
             },
         })
 
-        const { username, token } = this.state
-        const url = `${getAccountAPI()}?username=${username}&token=${token}`
+        const { accessToken } = this.state
+        const url = `${getBillAPI()}`
 
-        fetch(url)
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}` 
+            }
+        })
             .then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response
@@ -169,7 +176,7 @@ class Header extends React.Component {
     render() {
         const styles = {
             container: {
-                // WebkitAppRegion: 'drag',
+                WebkitAppRegion: 'drag',
                 minWidth: 1000,
                 width: '100%',
                 height: 49,
@@ -193,7 +200,7 @@ class Header extends React.Component {
                 alignItems: 'center',
             },
             accountContainer: {
-                // WebkitAppRegion: 'no-drag',
+                WebkitAppRegion: 'no-drag',
                 width: 100,
                 height: 49,
                 margin: '0 40px 0 0',
@@ -202,7 +209,7 @@ class Header extends React.Component {
                 justifyContent: 'center',
             },
             balanceContainer: {
-                // WebkitAppRegion: 'no-drag',
+                WebkitAppRegion: 'no-drag',
                 width: 200,
                 height: 49,
                 display: 'flex',
@@ -218,6 +225,7 @@ class Header extends React.Component {
                 justifyContent: 'center',
             },
             otherContainer: {
+                WebkitAppRegion: 'no-drag',
                 width: 200,
                 height: 49,
                 display: 'flex',

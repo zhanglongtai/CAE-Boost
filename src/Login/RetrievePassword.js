@@ -89,7 +89,7 @@ class RetrievePassword extends React.Component {
                     })
                 } else {
                     switch(result['error-msg']) {
-                        case 'username-not-exist':
+                        case 'UsernameNotExist':
                             this.setState({
                                 submitting: false,
                                 usernameHelp: '用户名不存在',

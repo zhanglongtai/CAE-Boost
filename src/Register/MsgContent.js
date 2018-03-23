@@ -15,14 +15,16 @@ class MsgContent extends React.Component {
         const {
             username,
             msgType,
-            token,
+            accessToken,
+            refreshToken,
         } = this.props
 
         if (msgType === 'success') {
             this.timer = setTimeout(() => {
                 ipcRenderer.send('close-register-win-open-main-view-win', {
                     username: username,
-                    token: token,
+                    refreshToken: refreshToken,
+                    accessToken: accessToken,
                 })
             }, 3000)
         }
@@ -100,7 +102,8 @@ MsgContent.propTypes = {
     username: PropTypes.string.isRequired,
     msgType: PropTypes.string.isRequired,
     msg: PropTypes.string.isRequired,
-    token: PropTypes.string.isRequired,
+    accessToken: PropTypes.string.isRequired,
+    refreshToken: PropTypes.string.isRequired,
     navToRegister: PropTypes.func.isRequired,
 }
 

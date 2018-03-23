@@ -71,8 +71,7 @@ class Task extends React.Component {
                 errorMsg: '',
             },
             taskContainerWidth: 1000,
-            username: '',
-            token: '',
+            accessToken: '',
             taskID: '',
             taskName: '',
         }
@@ -84,9 +83,10 @@ class Task extends React.Component {
 
     componentDidMount() {
         ipcRenderer.on('user-info', (event, args) => {
+            log('user-info')
+            const { accessToken } = args
             this.setState({
-                username: args.username,
-                token: args.token,
+                accessToken: accessToken,
             }, () => {
                 this.fetchTaskList()
             })
@@ -112,10 +112,15 @@ class Task extends React.Component {
             },
         })
 
-        const { username, token } = this.state
-        const url = `${getTaskListAPI()}?username=${username}&token=${token}`
+        const { accessToken } = this.state
+        const url = `${getTaskListAPI()}`
 
-        fetch(url)
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}` 
+            }
+        })
             .then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response
@@ -139,7 +144,7 @@ class Task extends React.Component {
                 return response.json()
             })
             .then((result) => {
-                const list = result['task-list']
+                const list = result['TaskList']
                 const newList = formattedData(list)
                 this.setState({
                     taskList: {
@@ -221,13 +226,40 @@ class Task extends React.Component {
             )
         } else {
             if (taskList.success) {
-                taskListContent = <TaskList
-                    taskContainerWidth={taskContainerWidth}
-                    taskList={taskList.list}
-                    content={content}
-                    setContent={this.setContent}
-                    setTaskDetail={this.setTaskDetail}
-                />
+                if (taskList.list.length === 0) {
+                    taskListContent = (
+                        <div
+                            className="task-list-empty-container"
+                            style={{
+                                // minWidth: 1000,
+                                // width: '100%',
+                                minWidth: taskContainerWidth,
+                                minHeight: 620,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <img
+                                src="img/empty-state.png"
+                                style={{
+                                    width: '573px',
+                                    height: '263px',
+                                }}
+                            />
+                            <h2>目前还未创建任务</h2>
+                        </div>
+                    )
+                } else {
+                    taskListContent = <TaskList
+                        taskContainerWidth={taskContainerWidth}
+                        taskList={taskList.list}
+                        content={content}
+                        setContent={this.setContent}
+                        setTaskDetail={this.setTaskDetail}
+                    />
+                }
             } else {
                 taskListContent = (
                     <div

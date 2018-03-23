@@ -154,6 +154,7 @@ class AddTask extends React.Component {
                 alignItems: 'center',
             },
             header: {
+                WebkitAppRegion: 'drag',
                 width: '95%',
                 height: '49px',
                 display: 'flex',
@@ -249,6 +250,7 @@ class AddTask extends React.Component {
                     <div
                         onClick={this.closeAddTaskWin}
                         style={{
+                            WebkitAppRegion: 'no-drag',
                             width: '30px',
                             height: '30px',
                             display: 'flex',

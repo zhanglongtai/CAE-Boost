@@ -1,15 +1,27 @@
 import config from "./config"
 
 const getloginAPI = function() {
-    return `${config.baseURL}/login`
+    if (config.env === 'dev') {
+        return config.testLoginURL
+    } else {
+        return `${config.baseURL}/login`
+    }
 }
 
 const getRegisterAPI = function() {
-    return `${config.baseURL}/register`
+    if (config.env === 'dev') {
+        return config.testRegisterURL
+    } else {
+        return `${config.baseURL}/register`
+    }
 }
 
 const getTaskListAPI = function() {
-    return `${config.baseURL}/task-list`
+    if (config.env === 'dev') {
+        return config.testTaskListURL
+    } else {
+        return `${config.baseURL}/task-list`
+    }
 }
 
 const getResidualAPI = function() {
@@ -18,12 +30,20 @@ const getResidualAPI = function() {
     return `${protocol}//${host}`
 }
 
-const getAccountAPI = function() {
-    return `${config.baseURL}/account`
+const getBillAPI = function() {
+    if (config.env === 'dev') {
+        return config.testBillURL
+    } else {
+        return `${config.baseURL}/bill`
+    }
 }
 
 const getPasswordAPI = function() {
-    return `${config.baseURL}/password`
+    if (config.env === 'dev') {
+        return config.testPasswordURL
+    } else {
+        return `${config.baseURL}/password`
+    }
 }
 
 export {
@@ -31,6 +51,6 @@ export {
     getRegisterAPI,
     getTaskListAPI,
     getResidualAPI,
-    getAccountAPI,
+    getBillAPI,
     getPasswordAPI,
 }

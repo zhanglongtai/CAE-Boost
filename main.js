@@ -5,10 +5,10 @@ const {
     shell,
 } = require("electron")
 
+const StoreConfig = require("./main-lib/storeConfig")
+
 const config = {
-    env: 'dev', // 'dev' or 'prod'
-    username: '',
-    token: '',
+    env: 'prod', // 'dev' or 'prod'
 }
 
 let reactDevtool = null
@@ -46,8 +46,25 @@ app.on('ready', () => {
         BrowserWindow.addDevToolsExtension(reactDevtool)
     }
 
-    createLoginWin()
-    // createMainViewWin()
+    const storeConfig = new StoreConfig()
+    const autoLogin = storeConfig.get('auto-login')
+
+    if (autoLogin) {
+        createMainViewWin()
+    } else {
+        createLoginWin()
+    }
+})
+
+app.on('will-quit', () => {
+    const storeConfig = new StoreConfig()
+    const autoLogin = storeConfig.get('auto-login')
+
+    if (autoLogin === false) {
+        storeConfig.set('username', '')
+        storeConfig.set('access-token', '')
+        storeConfig.set('refresh-token', '')
+    }
 })
 // ========= App ==========
 
@@ -116,6 +133,9 @@ ipcMain.on('download-file', (event, url) => {
 // ========== TestDownload ==========
 
 
+// ========== ConfigStore ==========
+
+
 // ========= Login ==========
 const createLoginWin = function() {
     const options = {
@@ -124,6 +144,8 @@ const createLoginWin = function() {
         minWidth: 640,
         minHeight: 440,
         show: false,
+        title: '登录',
+        icon: 'file://${__dirname}/renderer/icon/favicon.ico',
         // frame: false,
     }
 
@@ -155,8 +177,13 @@ const closeLoginWin = function() {
 }
 
 ipcMain.on('close-login-win-open-main-view-win', (event, args) => {
-    config.username = args.username
-    config.token = args.token
+    const { username, accessToken, refreshToken, autoLogin } = args
+
+    const storeConfig = new StoreConfig()
+    storeConfig.set('username', username)
+    storeConfig.set('access-token', accessToken)
+    storeConfig.set('refresh-token', refreshToken)
+    storeConfig.set('auto-login', autoLogin)
 
     win.winLogin.hide()
     createMainViewWin()
@@ -206,17 +233,20 @@ const closeRegisterWin = function() {
     }
 }
 
-ipcMain.on('close-register-win-open-main-view-win', (event, args) => {
-    config.username = args.username
-    config.token = args.token
-
-    win.winRegister.hide()
-    createMainViewWin()
-})
-
 ipcMain.on('close-register-win-open-login-win', () => {
     win.winRegister.hide()
     createLoginWin()
+})
+
+ipcMain.on('close-register-win-open-main-view-win', (event, args) => {
+    const { username, accessToken, refreshToken } = args
+    const storeConfig = new StoreConfig()
+    storeConfig.set('username', username)
+    storeConfig.set('access-token', accessToken)
+    storeConfig.set('refresh-token', refreshToken)
+
+    win.winRegister.hide()
+    createMainViewWin()
 })
 // ========= Register ==========
 
@@ -245,9 +275,14 @@ const createMainViewWin = function() {
     win.winMainView.on('ready-to-show', () => {
         closeLoginWin()
         closeRegisterWin()
+
+        const storeConfig = new StoreConfig()
+        const username = storeConfig.get('username')
+        const accessToken = storeConfig.get('access-token')
+
         win.winMainView.webContents.send('user-info', {
-            username: config.username,
-            token: config.token,
+            username: username,
+            accessToken: accessToken,
         })
         win.winMainView.show()
     })
@@ -264,6 +299,12 @@ const closeMainView = function() {
 }
 
 ipcMain.on('close-main-view-win-open-login-win', () => {
+    const storeConfig = new StoreConfig()
+    storeConfig.set('username', '')
+    storeConfig.set('access-token', '')
+    storeConfig.set('refresh-token', '')
+    storeConfig.set('auto-login', false)
+
     win.winMainView.hide()
     createLoginWin()
 })

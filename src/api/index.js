@@ -3,7 +3,7 @@ import {
     getRegisterAPI,
     getResidualAPI,
     getTaskListAPI,
-    getAccountAPI,
+    getBillAPI,
     getPasswordAPI,
 } from "./api"
 
@@ -12,6 +12,6 @@ export {
     getRegisterAPI,
     getResidualAPI,
     getTaskListAPI,
-    getAccountAPI,
+    getBillAPI,
     getPasswordAPI,
 }

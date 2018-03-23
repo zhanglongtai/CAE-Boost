@@ -114,10 +114,20 @@ class Login extends React.Component {
 
             const { username, password, autologin } = this.state
 
-            const url = `${getloginAPI()}?username=${username}&password=${password}`
-            fetch(url)
+            // const url = `${getloginAPI()}?username=${username}&password=${password}`
+            const url = `${getloginAPI()}`
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            })
                 .then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
+                    if (response.status >= 200 && response.status < 500) {
                         return response
                     } else {
                         if (response.status >= 500) {
@@ -132,19 +142,18 @@ class Login extends React.Component {
                 })
                 .then((result) => {
                     if (result['success']) {
-                        if (autologin) {
-                            ipcRenderer.send('auto-login', {
-                                username: username,
-                                password: password,
-                            })
-                        }
+                        const accessToken = result['data']['access_token']
+                        const refreshToken = result['data']['refresh_token']
+
                         ipcRenderer.send('close-login-win-open-main-view-win', {
                             username: username,
-                            token: result['token'],
+                            accessToken: accessToken,
+                            refreshToken: refreshToken,
+                            autoLogin: autologin ? true : false,
                         })
                     } else {
-                        switch(result['error-msg']) {
-                            case 'username-not-exist':
+                        switch(result['err_code']) {
+                            case 'UsernameNotExist':
                                 this.setState({
                                     submitting: false,
                                     usernameHelp: '用户名不存在',
@@ -153,13 +162,20 @@ class Login extends React.Component {
                                     passwordValidateStatus: '',
                                 })
                                 break
-                            case 'invalid-password':
+                            case 'InvalidPassword':
                                 this.setState({
                                     submitting: false,
                                     usernameHelp: '',
                                     usernameValidateStatus: '',
                                     passwordHelp: '密码不正确',
                                     passwordValidateStatus: 'error',
+                                })
+                                break
+                            case 'LoginFail':
+                                this.setState({
+                                    submitting: false,
+                                    content: 'error-msg',
+                                    errMsg: '用户名或密码错误',
                                 })
                                 break
                         }

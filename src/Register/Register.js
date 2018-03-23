@@ -30,10 +30,12 @@ class Register extends React.Component {
             emailValidateStatus: '',
             msgType: '',
             msg: '',
-            token: '',
+            accessToken: '',
+            refreshToken: '',
         }
 
         this.navToRegister = this.navToRegister.bind(this)
+
         this.setUsername = this.setUsername.bind(this)
         this.setPassword = this.setPassword.bind(this)
         this.setPasswordConfirm = this.setPasswordConfirm.bind(this)
@@ -45,6 +47,8 @@ class Register extends React.Component {
         this.validatedPassword = this.validatedPassword.bind(this)
         this.validatedPasswordConfirm = this.validatedPasswordConfirm.bind(this)
         this.validatedEmail = this.validatedEmail.bind(this)
+
+        this.clearErrorMsg = this.clearErrorMsg.bind(this)
     }
 
     componentDidMount() {
@@ -59,7 +63,22 @@ class Register extends React.Component {
         })
     }
 
+    clearErrorMsg() {
+        this.setState({
+            usernameHelp: '',
+            usernameValidateStatus: '',
+            passwordHelp: '',
+            passwordValidateStatus: '',
+            passwordConfirmHelp: '',
+            passwordConfirmValidateStatus: '',
+            emailHelp: '',
+            emailValidateStatus: '',
+        })
+    }
+
     setUsername(event) {
+        this.clearErrorMsg()
+
         const name = event.target.value
         this.setState({
             username: name
@@ -67,6 +86,8 @@ class Register extends React.Component {
     }
 
     setPassword(event) {
+        this.clearErrorMsg()
+
         const pw = event.target.value
         this.setState({
             password: pw
@@ -74,6 +95,8 @@ class Register extends React.Component {
     }
 
     setPasswordConfirm(event) {
+        this.clearErrorMsg()
+
         const pw = event.target.value
         this.setState({
             passwordConfirm: pw
@@ -81,6 +104,8 @@ class Register extends React.Component {
     }
 
     setEmail(event) {
+        this.clearErrorMsg()
+
         const email = event.target.value
         this.setState({
             email: email,
@@ -344,32 +369,25 @@ class Register extends React.Component {
         const validatedPass = this.validateFields()
 
         if (validatedPass) {
-            this.setState({
-                usernameHelp: '',
-                usernameValidateStatus: '',
-                passwordHelp: '',
-                passwordValidateStatus: '',
-                passwordConfirmHelp: '',
-                passwordConfirmValidateStatus: '',
-                emailHelp: '',
-                emailValidateStatus: '',
-            })
+            this.clearErrorMsg()
 
             const { username, password, email } = this.state
 
             const url = getRegisterAPI()
 
-            const formData = new FormData
-            formData.append('username', username)
-            formData.append('password', password)
-            formData.append('email', email)
-
             fetch(url, {
                 method: 'POST',
-                body: formData,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    email: email,
+                }),
             })
                 .then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
+                    if (response.status >= 200 && response.status < 500) {
                         return response
                     } else {
                         if (response.status >= 500) {
@@ -384,15 +402,19 @@ class Register extends React.Component {
                 })
                 .then((result) => {
                     if (result['success']) {
+                        const accessToken = result['data']['access_token']
+                        const refreshToken = result['data']['refresh_token']
+
                         this.setState({
                             content: 'msg-content',
                             msgType: 'success',
                             msg: '注册成功!',
-                            token: result['token'],
+                            accessToken: accessToken,
+                            refreshToken: refreshToken,
                         })
                     } else {
-                        switch(result['error-msg']) {
-                            case 'username-exist':
+                        switch(result['err_code']) {
+                            case 'UsernameExist':
                                 this.setState({
                                     submitting: false,
                                     usernameHelp: '用户名已存在',
@@ -403,6 +425,19 @@ class Register extends React.Component {
                                     passwordConfirmValidateStatus: '',
                                     emailHelp: '',
                                     emailValidateStatus: '',
+                                })
+                                break
+                            case 'EmailExist':
+                                this.setState({
+                                    submitting: false,
+                                    usernameHelp: '',
+                                    usernameValidateStatus: '',
+                                    passwordHelp: '',
+                                    passwordValidateStatus: '',
+                                    passwordConfirmHelp: '',
+                                    passwordConfirmValidateStatus: '',
+                                    emailHelp: '邮箱已被注册',
+                                    emailValidateStatus: 'error',
                                 })
                                 break
                         }
@@ -465,7 +500,8 @@ class Register extends React.Component {
             emailValidateStatus,
             msgType,
             msg,
-            token,
+            accessToken,
+            refreshToken,
         } = this.state
 
         return (
@@ -496,7 +532,8 @@ class Register extends React.Component {
                         username={username}
                         msgType={msgType}
                         msg={msg}
-                        token={token}
+                        accessToken={accessToken}
+                        refreshToken={refreshToken}
                         navToRegister={this.navToRegister}
                     />
                 }
