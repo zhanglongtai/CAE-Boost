@@ -165,7 +165,7 @@ def task_list():
 
 
 @test_api.route('/bill', methods=['GET'])
-def account():
+def bill():
     username = request.args.get('username')
     token = request.args.get('token')
 
@@ -180,8 +180,20 @@ def account():
         return jsonify({
             'balance': '100.00',
             'voucher': '200.00',
-            'charge-record': [],
-            'consume-record': [],
+            'charge-record': [
+                {'time': '2018-03-22 12:00', 'amount': '100.00', 'channel': 'alipay', 'trade-id': 'd905acb0'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+            ],
+            'consume-record': [
+                {'time': '2018-03-22 18:00', 'amount': '100.00', 'task-name': 'Fluent测试', 'task-id': 'd905acb0'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
+            ],
         })
 
     def case2():

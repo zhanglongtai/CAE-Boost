@@ -8,7 +8,7 @@ const {
 const StoreConfig = require("./main-lib/storeConfig")
 
 const config = {
-    env: 'prod', // 'dev' or 'prod'
+    env: 'dev', // 'dev' or 'prod'
 }
 
 let reactDevtool = null
@@ -17,7 +17,7 @@ switch (process.platform) {
         reactDevtool = '/home/tiger/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/2.3.3_0'
         break
     case 'win32':
-        reactDevtool = 'C:\\Users\\Tiger\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi\\3.1.0_0'
+        reactDevtool = 'C:\\Users\\Tiger\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi\\3.2.0_0'
         break
 }
 
@@ -30,6 +30,7 @@ const win = {
     winAddTask: null,
     winNodeTypeSelector: null,
     winCharge: null,
+    winBillHistory: null,
 }
 
 
@@ -430,5 +431,51 @@ ipcMain.on('open-charge-win', () => {
 
 ipcMain.on('close-charge-win', () => {
     win.winCharge.close()
+})
+// ========= Charge ==========
+
+
+// ========= BillHistroy ==========
+const createBillHistoryWin = function() {
+    const options = {
+        width: 500,
+        height: 1000,
+        frame: false,
+        show: false,
+        parent: win.winMainView,
+        modal: true,
+    }
+
+    win.winBillHistory = new BrowserWindow(options)
+
+    if (config.env === 'dev') {
+        win.winBillHistory.webContents.openDevTools()
+    }
+
+    win.winBillHistory.loadURL(`file://${__dirname}/renderer/billHistory.html`)
+
+    win.winBillHistory.on('ready-to-show', () => {
+        const storeConfig = new StoreConfig()
+        const username = storeConfig.get('username')
+        const accessToken = storeConfig.get('access-token')
+
+        win.winBillHistory.webContents.send('user-info', {
+            username: username,
+            accessToken: accessToken,
+        })
+        win.winBillHistory.show()
+    })
+
+    win.winBillHistory.on('closed', () => {
+        win.winBillHistory = null
+    })
+}
+
+ipcMain.on('open-bill-history-win', () => {
+    createBillHistoryWin()
+})
+
+ipcMain.on('close-bill-history-win', () => {
+    win.winBillHistory.close()
 })
 // ========= Charge ==========

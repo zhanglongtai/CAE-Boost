@@ -157,11 +157,17 @@ class Header extends React.Component {
         ipcRenderer.send('open-charge-win')
     }
 
+    openBillHistoryWin() {
+        ipcRenderer.send('open-bill-history-win')
+    }
+
     handleProfile(menu) {
         switch (menu.key) {
             case "1":
-            case "2":
                 log(menu.key)
+                break
+            case "2":
+                this.openBillHistoryWin()
                 break
             case "3":
                 this.logout()
@@ -244,8 +250,8 @@ class Header extends React.Component {
 
         const menu = (
             <Menu onClick={this.handleProfile}>
-                <Menu.Item key="0">修改密码</Menu.Item>
-                <Menu.Item key="1">查看账单</Menu.Item>
+                <Menu.Item key="1">修改密码</Menu.Item>
+                <Menu.Item key="2">查看账单</Menu.Item>
                 <Menu.Divider />
                 <Menu.Item key="3">注销</Menu.Item>
             </Menu>
