@@ -7,12 +7,30 @@ import Button from "antd/lib/button"
 import Icon from "antd/lib/icon"
 
 import log from "../util/log"
+import { getTaskAPI } from "../api"
 
 const { ipcRenderer } = window.require("electron")
 
 class ConsumeDetail extends React.Component {
     constructor(props) {
         super(props)
+
+        this.state = {
+            task: {
+                isFetching: true,
+                success: false,
+                start: "",
+                end: "",
+                taskName: "",
+                errorMsg: "",
+            },
+        }
+
+        this.fetchTask = this.fetchTask.bind(this)
+    }
+
+    componentDidMount() {
+        this.fetchTask()
     }
 
     fetchTask() {
@@ -27,9 +45,9 @@ class ConsumeDetail extends React.Component {
             },
         })
 
-        const url = getBillAPI()
+        const { accessToken, consumeInfo } = this.props
 
-        const { accessToken } = this.state
+        const url = getTaskAPI(consumeInfo.tradeID)
 
         fetch(url, {
             method: 'GET',
@@ -60,19 +78,18 @@ class ConsumeDetail extends React.Component {
                 return response.json()
             })
             .then((result) => {
-                const balance = result['balance']
-                const voucher = result['voucher']
-                const chargeRecord = result['charge-record']
-                const consumeRecord = result['consume-record']
+                log('result', result)
+                const start = result['Task']['start']
+                const end = result['Task']['end']
+                const taskName = result['Task']['task-name']
 
                 this.setState({
-                    bill: {
+                    task: {
                         isFetching: false,
                         success: true,
-                        balance: balance,
-                        voucher: voucher,
-                        chargeRecord: formattedChargeList(chargeRecord),
-                        consumeRecord: formattedConsumeList(consumeRecord),
+                        start: start,
+                        end: end,
+                        taskName: taskName,
                         errorMsg: '',
                     },
                 })
@@ -81,25 +98,23 @@ class ConsumeDetail extends React.Component {
                 log(error)
                 if (error.message === 'Failed to fetch') {
                     this.setState({
-                        bill: {
+                        task: {
                             isFetching: false,
                             success: false,
-                            balance: '',
-                            voucher: '',
-                            chargeRecord: [],
-                            consumeRecord: [],
+                            start: '',
+                            end: '',
+                            taskName: '',
                             errorMsg: '网络错误',
                         },
                     })
                 } else {
                     this.setState({
-                        bill: {
+                        task: {
                             isFetching: false,
                             success: false,
-                            balance: '',
-                            voucher: '',
-                            chargeRecord: [],
-                            consumeRecord: [],
+                            start: '',
+                            end: '',
+                            taskName: '',
                             errorMsg: error.message,
                         },
                     })
@@ -111,8 +126,9 @@ class ConsumeDetail extends React.Component {
         const styles = {
             container: {
                 width: 500,
-                height: 1000,
+                height: '650px',
                 display: "flex",
+                flexDirection: 'column',
             },
             itemContainer: {
                 width: "400px",
@@ -123,38 +139,112 @@ class ConsumeDetail extends React.Component {
             },
         }
 
-        const { time, amount, channel, tradeID } = this.props.chargeInfo
+        const { task } = this.state
 
-        return (
-            <div className='charge-detail-container' style={styles.container}>
-                <div style={{width: 100, height: 30}}>
-                    <Button>返回</Button>
+        let content = null
+        if (task.isFetching) {
+            content = (
+                <div className="consume-detail-container" style={styles.container}>
+                    <div
+                        className="consume-loading-container"
+                        style={{
+                            minWidth: 500,
+                            width: "100%",
+                            minHeight: 500,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <Spin tip="获取数据中..." />
+                    </div>
                 </div>
-                <Card>
-                    <div style={styles.itemContainer}>
-                        <p>交易ID:</p>
-                        <p>{tradeID}</p>
+            )
+        } else {
+            if (task.success) {
+                const { navToBillList, consumeInfo } = this.props
+
+                content = (
+                    <div className='consume-detail-container' style={styles.container}>
+                        <div style={{width: 100, height: 30, margin: '20px 0 20px'}}>
+                            <Button type="primary" onClick={navToBillList} style={{width: '100px'}}>返回</Button>
+                        </div>
+                        <Card>
+                            <div style={styles.itemContainer}>
+                                <p>交易ID:</p>
+                                <p>{consumeInfo.tradeID}</p>
+                            </div>
+                            <div style={styles.itemContainer}>
+                                <p>消费金额:</p>
+                                <p>{consumeInfo.amount}</p>
+                            </div>
+                            <div style={styles.itemContainer}>
+                                <p>所属任务:</p>
+                                <p>{task.taskName}</p>
+                            </div>
+                            <div style={styles.itemContainer}>
+                                <p>任务起始时间:</p>
+                                <p>{task.start}</p>
+                            </div>
+                            <div style={styles.itemContainer}>
+                                <p>任务结束时间:</p>
+                                <p>{task.end}</p>
+                            </div>
+                        </Card>
                     </div>
-                    <div style={styles.itemContainer}>
-                        <p>支付金额:</p>
-                        <p>{amount}</p>
+                )
+            } else {
+                content = (
+                    <div className="consume-detail-container" style={styles.container}>
+                        <div
+                            className="consume-error-msg-container"
+                            style={{
+                                minWidth: 500,
+                                width: "100%",
+                                minHeight: 500,
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    margin: "0 0 40px 0",
+                                }}
+                            >
+                                <i
+                                    className="material-icons"
+                                    style={{
+                                        fontSize: 40,
+                                        margin: "0 10px 0 0",
+                                        color: "gray",
+                                    }}
+                                >error_outline</i>
+                                <h3 style={{margin: 0}}>{task.errorMsg}</h3>
+                            </div>
+                            <Button
+                                type="primary"
+                                style={{width: "100px"}}
+                                onClick={this.fetchTask}
+                            >点击重试</Button>
+                        </div>
                     </div>
-                    <div style={styles.itemContainer}>
-                        <p>支付日期:</p>
-                        <p>{time}</p>
-                    </div>
-                    <div style={styles.itemContainer}>
-                        <p>支付方式:</p>
-                        <p>{channel}</p>
-                    </div>
-                </Card>
-            </div>
-        )
+                )
+            }
+        }
+
+        return content
     }
 }
 
 ConsumeDetail.propTypes = {
-    chargeInfo: PropTypes.object.isRequired,
+    consumeInfo: PropTypes.object.isRequired,
+    accessToken: PropTypes.string.isRequired,
+    navToBillList: PropTypes.func.isRequired,
 }
 
 export default ConsumeDetail

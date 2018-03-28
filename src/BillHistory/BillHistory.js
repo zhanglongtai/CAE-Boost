@@ -38,6 +38,7 @@ const formattedConsumeList = function(list) {
         const amount = `￥${item['amount']}`
         const taskName = item['task-name']
         const taskID = item['task-id']
+        const tradeID = item['trade-id']
 
         return {
             key: index,
@@ -45,6 +46,7 @@ const formattedConsumeList = function(list) {
             amount: amount,
             taskName: taskName,
             taskID: taskID,
+            tradeID: tradeID,
         }
     })
 }
@@ -55,10 +57,17 @@ class BillHistory extends React.Component {
 
         this.state = {
             content: 'bill-list', // bill-list, charge-detail, consume-detail
-            chargeInfo: {},
-            taskID: '',
-            taskConsumeAmount: '',
-            username: '',
+            chargeInfo: {
+                time: '',
+                amount: '',
+                channel: '',
+                tradeID: '',
+            },
+            consumeInfo: {
+                taskID: '',
+                amount: '',
+                tradeID: '',
+            },
             accessToken: '',
             bill: {
                 isFetching: true,
@@ -82,9 +91,8 @@ class BillHistory extends React.Component {
 
         ipcRenderer.on('user-info', (event, args) => {
             log('user-info', args)
-            const { username, accessToken } = args
+            const { accessToken } = args
             this.setState({
-                username: username,
                 accessToken: accessToken,
             }, () => {
                 this.fetchBill()
@@ -196,19 +204,18 @@ class BillHistory extends React.Component {
         })
     }
 
-    navToConsumeDetail(taskID, amount) {
+    navToConsumeDetail(info) {
         this.setState({
             content: 'consume-detail',
-            taskID: taskID,
-            taskConsumeAmount: amount,
+            consumeInfo: info,
         })
     }
 
     navToBillList() {
         this.setState({
-            content: 'task-list',
+            content: 'bill-list',
             chargeInfo: {},
-            taskID: '',
+            consumeInfo: {},
         })
     }
 
@@ -216,7 +223,7 @@ class BillHistory extends React.Component {
         const styles = {
             container: {
                 width: 600,
-                height: 1000,
+                height: 700,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -228,6 +235,14 @@ class BillHistory extends React.Component {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+            },
+            contentContainer: {
+                width: '100%',
+                height: '650px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                overflowY: 'auto',
             },
             itemContainer: {
                 width: "400px",
@@ -270,12 +285,12 @@ class BillHistory extends React.Component {
                         time: record['time'],
                         amount: record['amount'],
                         channel: record['channel'],
-                        tradeID: record['trade-id']
+                        tradeID: record['tradeID']
                     }
 
                     return (
                         <span>
-                            <a onClick={this.navToChargeDetail(info)}>查看详情</a>
+                            <a onClick={this.navToChargeDetail.bind(null, info)}>查看详情</a>
                         </span>
                     )
                 },
@@ -302,26 +317,29 @@ class BillHistory extends React.Component {
                 title: "操作",
                 key: "action",
                 render: (text, record) => {
-                    const taskID = record['task-id']
-                    const amount = record['amount']
+                    const info = {
+                        taskID: record['taskID'],
+                        tradeID: record['tradeID'],
+                        amount: record['amount']
+                    }
 
                     return (
                         <span>
-                            <a onClick={this.navToConsumeDetail(taskID, amount)}>查看详情</a>
+                            <a onClick={this.navToConsumeDetail.bind(null, info)}>查看详情</a>
                         </span>
                     )
                 },
             }
         ]
 
-        const { bill, content, chargeInfo, taskID, taskConsumeAmount } = this.state
+        const { accessToken, bill, content, chargeInfo, consumeInfo } = this.state
 
         let billContent
         switch (content) {
             case 'bill-list': {
                 if (bill.isFetching) {
                     billContent = (
-                        <div className="bill-container" style={styles.container}>
+                        <div className="bill-container" style={styles.contentContainer}>
                             <div
                                 className="bill-loading-container"
                                 style={{
@@ -340,10 +358,11 @@ class BillHistory extends React.Component {
                 } else {
                     if (bill.success) {
                         billContent = (
-                            <div className="bill-container" style={styles.container}>
+                            <div className="bill-container" style={styles.contentContainer}>
                                 <div
                                     style={{
                                         width: "500px",
+                                        minHeight: '150px',
                                         padding: "20px 10px 20px 10px",
                                         display: "flex",
                                         justifyContent: "space-between",
@@ -357,6 +376,7 @@ class BillHistory extends React.Component {
                                 <div
                                     style={{
                                         width: "500px",
+                                        minHeight: '440px',
                                         padding: "20px 10px 20px 10px",
                                         display: "flex",
                                         flexDirection: "column",
@@ -372,6 +392,7 @@ class BillHistory extends React.Component {
                                 <div
                                     style={{
                                         width: "500px",
+                                        minHeight: '440px',
                                         padding: "20px 10px 20px 10px",
                                         display: "flex",
                                         flexDirection: "column",
@@ -388,7 +409,7 @@ class BillHistory extends React.Component {
                         )
                     } else {
                         billContent = (
-                            <div className="charge-detail-container" style={styles.container}>
+                            <div className="charge-detail-container" style={styles.contentContainer}>
                                 <div
                                     className="charge-error-msg-container"
                                     style={{
@@ -420,7 +441,7 @@ class BillHistory extends React.Component {
                                     </div>
                                     <Button
                                         type="primary"
-                                        style={{width: "15%"}}
+                                        style={{width: "100px"}}
                                         onClick={this.fetchChargeDetail}
                                     >点击重试</Button>
                                 </div>
@@ -438,9 +459,9 @@ class BillHistory extends React.Component {
                 break
             case 'consume-detail':
                 billContent = <ConsumeDetail
-                    taskID={taskID}
-                    taskConsumeAmount={taskConsumeAmount}
+                    consumeInfo={consumeInfo}
                     navToBillList={this.navToBillList}
+                    accessToken={accessToken}
                 />
                 break
             default:

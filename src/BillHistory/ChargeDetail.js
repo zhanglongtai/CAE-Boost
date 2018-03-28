@@ -16,8 +16,9 @@ class ChargeDetail extends React.Component {
         const styles = {
             container: {
                 width: 500,
-                height: 1000,
+                height: '500px',
                 display: "flex",
+                flexDirection: 'column',
             },
             itemContainer: {
                 width: "400px",
@@ -29,11 +30,12 @@ class ChargeDetail extends React.Component {
         }
 
         const { time, amount, channel, tradeID } = this.props.chargeInfo
+        const { navToBillList } = this.props
 
         return (
             <div className='charge-detail-container' style={styles.container}>
-                <div style={{width: 100, height: 30}}>
-                    <Button>返回</Button>
+                <div style={{width: 100, height: 30, margin: '20px 0 20px'}}>
+                    <Button type="primary" onClick={navToBillList} style={{width: '100px'}}>返回</Button>
                 </div>
                 <Card>
                     <div style={styles.itemContainer}>
@@ -60,6 +62,7 @@ class ChargeDetail extends React.Component {
 
 ChargeDetail.propTypes = {
     chargeInfo: PropTypes.object.isRequired,
+    navToBillList: PropTypes.func.isRequired,
 }
 
 export default ChargeDetail

@@ -164,6 +164,38 @@ def task_list():
     return switch[1]()
 
 
+@test_api.route('/task/<string:task_id>')
+def task(task_id):
+    print('task_id', task_id)
+
+    # response case code
+    # 1 - normal task
+    # 2 - server error
+
+    def case1():
+        fake_data = {
+            'task-name': 'fluent计算测试',
+            'start': '2018-03-22 12:00',
+            'end': '2018-03-22 20:00',
+        }
+
+        time.sleep(1)
+
+        return jsonify({
+            'Task': fake_data,
+        })
+
+    def case2():
+        return Response(status=500)
+
+    switch = {
+        1: case1,
+        2: case2,
+    }
+
+    return switch[1]()
+
+
 @test_api.route('/bill', methods=['GET'])
 def bill():
     username = request.args.get('username')
@@ -188,11 +220,11 @@ def bill():
                 {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
             ],
             'consume-record': [
-                {'time': '2018-03-22 18:00', 'amount': '100.00', 'task-name': 'Fluent测试', 'task-id': 'd905acb0'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e'},
+                {'time': '2018-03-22 18:00', 'amount': '100.00', 'task-name': 'Fluent测试', 'task-id': 'd905acb0', 'trade-id': 'd905acb0'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
+                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
             ],
         })
 

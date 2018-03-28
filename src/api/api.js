@@ -24,6 +24,14 @@ const getTaskListAPI = function() {
     }
 }
 
+const getTaskAPI = function(taskID) {
+    if (config.env === 'dev') {
+        return `${config.testTaskURL}/${taskID}`
+    } else {
+        return `${config.baseURL}/task/${taskID}`
+    }
+}
+
 const getResidualAPI = function() {
     const protocol = config.baseURL.split("/")[0]
     const host = config.baseURL.split("/")[2]
@@ -53,4 +61,5 @@ export {
     getResidualAPI,
     getBillAPI,
     getPasswordAPI,
+    getTaskAPI,
 }

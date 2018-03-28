@@ -1,6 +1,6 @@
 {
-    "username": "a",
-    "access-token": "access_token",
-    "refresh-token": "refresh_token",
+    "username": "",
+    "access-token": "",
+    "refresh-token": "",
     "auto-login": false
 }

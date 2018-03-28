@@ -5,6 +5,7 @@ import {
     getTaskListAPI,
     getBillAPI,
     getPasswordAPI,
+    getTaskAPI,
 } from "./api"
 
 export {
@@ -14,4 +15,5 @@ export {
     getTaskListAPI,
     getBillAPI,
     getPasswordAPI,
+    getTaskAPI,
 }

@@ -439,7 +439,7 @@ ipcMain.on('close-charge-win', () => {
 const createBillHistoryWin = function() {
     const options = {
         width: 500,
-        height: 1000,
+        height: 700,
         frame: false,
         show: false,
         parent: win.winMainView,
