@@ -6,6 +6,8 @@ import {
     getBillAPI,
     getPasswordAPI,
     getTaskAPI,
+    getChargeAPI,
+    getCheckPayAPI,
 } from "./api"
 
 export {
@@ -16,4 +18,6 @@ export {
     getBillAPI,
     getPasswordAPI,
     getTaskAPI,
+    getChargeAPI,
+    getCheckPayAPI,
 }

@@ -54,6 +54,22 @@ const getPasswordAPI = function() {
     }
 }
 
+const getChargeAPI = function() {
+    if (config.env === 'dev') {
+        return config.testChargeURL
+    } else {
+        return `${config.baseURL}/charge`
+    }
+}
+
+const getCheckPayAPI = function(tradeID) {
+    if (config.env === 'dev') {
+        return config.testCheckPayURL
+    } else {
+        return `${config.baseURL}/charge/${tradeID}`
+    }
+}
+
 export {
     getloginAPI,
     getRegisterAPI,
@@ -62,4 +78,6 @@ export {
     getBillAPI,
     getPasswordAPI,
     getTaskAPI,
+    getChargeAPI,
+    getCheckPayAPI,
 }

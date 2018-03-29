@@ -405,7 +405,7 @@ ipcMain.on('submit-node-type', (event, args) => {
 const createChargeWin = function() {
     const options = {
         width: 500,
-        height: 400,
+        height: 500,
         frame: false,
         // resizable: false,
         parent: win.winMainView,

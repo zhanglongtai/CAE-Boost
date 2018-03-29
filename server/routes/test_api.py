@@ -6,6 +6,7 @@ from flask import (
 )
 import time
 import json
+import random
 
 test_api = Blueprint('test_api', __name__)
 
@@ -273,3 +274,64 @@ def password():
         }
 
         return switch[2]()
+
+
+@test_api.route('/charge', methods=['POST'])
+def charge():
+    data = request.data
+    data = json.loads(data)
+
+    print(data)
+
+    # response case code
+    # 1 - accepted
+    # 3 - server error
+
+    def case1():
+        time.sleep(2)
+
+        return jsonify({
+            'qr-code': 'pay-url',
+            'trade-id': 'trade-id',
+        })
+
+    def case2():
+        return Response(status=500)
+
+    switch = {
+        1: case1,
+        2: case2,
+    }
+
+    return switch[1]()
+
+
+@test_api.route('/charge/<string:trade_id>')
+def check_pay(trade_id):
+    print('trade_id', trade_id)
+
+    # response case code
+    # 1 - normal task
+    # 2 - server error
+
+    def case1():
+        judge = random.random()
+
+        if judge < 0.2:
+            return jsonify({
+                'success': True,
+            })
+        else:
+            return jsonify({
+                'success': False,
+            })
+
+    def case2():
+        return Response(status=500)
+
+    switch = {
+        1: case1,
+        2: case2,
+    }
+
+    return switch[1]()

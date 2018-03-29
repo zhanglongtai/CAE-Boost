@@ -1,10 +1,17 @@
 import React from "react"
 // import PropTypes from "prop-types"
+import fetch from "isomorphic-fetch"
 import Icon from "antd/lib/icon"
 import Select from "antd/lib/select"
 import Button from "antd/lib/button"
 
+import PrepareOrder from "./PrepareOrder"
+import SendingOrder from "./SendingOrder"
+import QRCodeURL from "./QRCodeURL"
+import ErrorMsg from "./ErrorMsg"
 import log from "../util/log"
+import { getChargeAPI } from "../api"
+import PayResult from "./PayResult";
 
 const Option = Select.Option
 
@@ -15,18 +22,123 @@ class Charge extends React.Component {
         super(props)
 
         this.state = {
+            accessToken: '',
+            stage: 'prepare-order', // 'prepare-order', 'sending-order', 'qr-code', 'paying', 'pay-result', 'error-msg'
             amount: '',
+            qrCodeURL: '',
+            tradeID: '',
+            payChannel: '',
+            errMsg: '',
+            backTo: '',
         }
 
         this.setAmount = this.setAmount.bind(this)
+        this.sendOrder = this.sendOrder.bind(this)
+        this.navTo = this.navTo.bind(this)
+        this.navToErrorMsg = this.navToErrorMsg.bind(this)
     }
 
     componentDidMount() {
+        ipcRenderer.on('user-info', (event, args) => {
+            const { accessToken } = args
+            this.setState({
+                accessToken: accessToken,
+            })
+        })
+    }
+
+    sendOrder(payChannel) {
+        this.setState({
+            stage: 'sending-order',
+        })
+        const { accessToken, amount } = this.state
+
+        // const url = `${getloginAPI()}?username=${username}&password=${password}`
+        const url = `${getChargeAPI()}`
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+                amount: amount,
+            }),
+        })
+            .then((response) => {
+                if (response.status >= 200 && response.status < 500) {
+                    return response
+                } else {
+                    if (response.status >= 500) {
+                        const error = new Error('服务器错误，提交订单失败')
+                        error.response = response
+                        throw error
+                    }
+                }
+            })
+            .then((response) => {
+                return response.json()
+            })
+            .then((result) => {
+                const qrCodeURL = result['qr-code']
+                const tradeID = result['trade-id']
+
+                this.setState({
+                    stage: 'qr-code',
+                    qrCodeURL: qrCodeURL,
+                    tradeID: tradeID,
+                    payChannel: payChannel,
+                    errMsg: '',
+                    backTo: '',
+                })
+            })
+            .catch((error) => {
+                log('request failed', error.message)
+                if (error.message === 'Failed to fetch') {
+                    this.setState({
+                        stage: 'error-msg',
+                        amount: '',
+                        qrCodeURL: '',
+                        tradeID: '',
+                        payChannel: '',
+                        errMsg: '网络错误，发送订单失败',
+                        backTo: 'prepare-order',
+                    })
+                } else {
+                    this.setState({
+                        stage: 'error-msg',
+                        amount: '',
+                        qrCodeURL: '',
+                        tradeID: '',
+                        payChannel: '',
+                        errMsg: error.message,
+                        backTo: 'prepare-order',
+                    })
+                }
+            })
     }
 
     setAmount(amount) {
         this.setState({
             amount: amount,
+        })
+    }
+
+    navTo(stage) {
+        this.setState({
+            stage: stage,
+        })
+    }
+
+    navToErrorMsg(errMsg, backTo) {
+        this.setState({
+            stage: 'error-msg',
+            amount: '',
+            qrCodeURL: '',
+            tradeID: '',
+            payChannel: '',
+            errMsg: errMsg,
+            backTo: backTo,
         })
     }
 
@@ -38,7 +150,7 @@ class Charge extends React.Component {
         const styles = {
             container: {
                 width: 500,
-                height: 400,
+                height: 500,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -52,7 +164,7 @@ class Charge extends React.Component {
             },
             content: {
                 width: '100%',
-                height: '350px',
+                height: '450px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -62,6 +174,47 @@ class Charge extends React.Component {
                 marginTop: '20px',
                 padding: '10px 10px 10px 10px',
             },
+        }
+
+        const { accessToken, stage, amount, errMsg, backTo, qrCodeURL, tradeID, payChannel } = this.state
+
+        let content
+        switch (stage) {
+            case 'prepare-order':
+                content = <PrepareOrder
+                    setAmount={this.setAmount}
+                    sendOrder={this.sendOrder}
+                />
+                break
+            case 'sending-order':
+                content = <SendingOrder />
+                break
+            case 'qr-code':
+                content = <QRCodeURL
+                    accessToken={accessToken}
+                    payChannel={payChannel}
+                    qrCodeURL={qrCodeURL}
+                    tradeID={tradeID}
+                    navTo={this.navTo}
+                    navToErrorMsg={this.navToErrorMsg}
+                />
+                break
+            case 'pay-result':
+                content = <PayResult
+                    amount={amount}
+                    closeChargeWin={this.closeChargeWin}
+                />
+                break
+            case 'error-msg':
+                content = <ErrorMsg
+                    errMsg={errMsg}
+                    backTo={backTo}
+                    navTo={this.navTo}
+                />
+                break
+            default:
+                content = null
+                break
         }
 
         return (
@@ -96,31 +249,7 @@ class Charge extends React.Component {
                         width: '100%',
                     }}
                 />
-                <div className='add-task-content' style={styles.content}>
-                    <div style={styles.itemContainer}>
-                        <h2>Dlake账户充值</h2>
-                    </div>
-                    <div style={{width: '80%', padding: '10px 10px 10px 10px'}}>
-                        <h4>充值金额</h4>
-                        <Select placeholder="选择充值金额" style={{width: '100%'}} onChange={this.setAmount}>
-                            <Option value="100">￥100.00</Option>
-                            <Option value="200">￥200.00</Option>
-                            <Option value="500">￥500.00</Option>
-                        </Select>
-                    </div>
-                    <div style={styles.itemContainer}>
-                        <Button type="primary" style={{width: '100%'}}>支付宝支付</Button>
-                    </div>
-                    <div style={{width: '80%', padding: '10px 10px 10px 10px'}}>
-                        <Button
-                            style={{
-                                backgroundColor: 'green',
-                                width: '100%',
-                                color: 'white',
-                            }}
-                        >微信支付</Button>
-                    </div>
-                </div>
+                {content}
             </div>
         )
     }

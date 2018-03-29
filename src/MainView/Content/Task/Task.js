@@ -83,7 +83,6 @@ class Task extends React.Component {
 
     componentDidMount() {
         ipcRenderer.on('user-info', (event, args) => {
-            log('user-info')
             const { accessToken } = args
             this.setState({
                 accessToken: accessToken,
@@ -118,7 +117,7 @@ class Task extends React.Component {
         fetch(url, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${accessToken}` 
+                'Authorization': `Bearer ${accessToken}`,
             }
         })
             .then((response) => {
