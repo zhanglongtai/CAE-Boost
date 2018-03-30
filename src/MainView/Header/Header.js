@@ -29,7 +29,7 @@ class Header extends React.Component {
             winMax: false,
         }
 
-        this.fetchAccount = this.fetchAccount.bind(this)
+        this.fetchBill = this.fetchBill.bind(this)
         this.maximizeWin = this.maximizeWin.bind(this)
         this.restoreWin = this.restoreWin.bind(this)
         this.handleProfile = this.handleProfile.bind(this)
@@ -43,12 +43,16 @@ class Header extends React.Component {
                 username: username,
                 accessToken: accessToken,
             }, () => {
-                this.fetchAccount()
+                this.fetchBill()
             })
+        })
+
+        ipcRenderer.on('update-bill', () => {
+            this.fetchBill()
         })
     }
 
-    fetchAccount() {
+    fetchBill() {
         this.setState({
             account: {
                 isFetching: true,

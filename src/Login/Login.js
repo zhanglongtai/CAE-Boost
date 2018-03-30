@@ -37,7 +37,7 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
-        ipcRenderer.send('ready-to-show')
+        ipcRenderer.send('login-ready-to-show')
     }
 
     navToLogin() {

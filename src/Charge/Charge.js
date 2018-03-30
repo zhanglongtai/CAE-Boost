@@ -8,10 +8,10 @@ import Button from "antd/lib/button"
 import PrepareOrder from "./PrepareOrder"
 import SendingOrder from "./SendingOrder"
 import QRCodeURL from "./QRCodeURL"
+import PayResult from "./PayResult"
 import ErrorMsg from "./ErrorMsg"
 import log from "../util/log"
 import { getChargeAPI } from "../api"
-import PayResult from "./PayResult";
 
 const Option = Select.Option
 
@@ -143,6 +143,11 @@ class Charge extends React.Component {
     }
 
     closeChargeWin() {
+        const { amount } = this.state
+        if (amount !== '') {
+            ipcRenderer.send('update-bill')
+        }
+        
         ipcRenderer.send('close-charge-win')
     }
 

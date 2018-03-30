@@ -7,6 +7,7 @@ import InputNumber from "antd/lib/input-number"
 import Button from "antd/lib/button"
 
 import FileInfo from "./FileInfo"
+import { getSubmitTaskAPI } from "../api"
 import log from "../util/log"
 
 const Option = Select.Option
@@ -29,7 +30,7 @@ class AddTask extends React.Component {
             fileList: [],
             nodeTypeIndex: 0,
             nodeType: '',
-            nodeNum: 0,
+            nodeNum: 8,
         }
 
         this.setTaskName = this.setTaskName.bind(this)
@@ -40,6 +41,7 @@ class AddTask extends React.Component {
         this.handleInputChange = this.handleInputChange.bind(this)
         this.setNodeType = this.setNodeType.bind(this)
         this.setNodeNum = this.setNodeNum.bind(this)
+        this.submitTask = this.submitTask.bind(this)
     }
 
     componentDidMount() {
@@ -48,7 +50,8 @@ class AddTask extends React.Component {
         })
     }
 
-    setTaskName(name) {
+    setTaskName(event) {
+        const name = event.target.value
         this.setState({
             taskName: name,
         })
@@ -136,6 +139,57 @@ class AddTask extends React.Component {
         })
     }
 
+    submitTask() {
+        const { taskName, solver, fileList, nodeType, nodeNum } = this.state
+
+        const url = `${getSubmitTaskAPI()}`
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                taskName: taskName,
+                solver: solver,
+                fileList: fileList,
+                nodeType: nodeType,
+                nodeNum: nodeNum,
+            }),
+        })
+            .then((response) => {
+                if (response.status >= 200 && response.status < 500) {
+                    return response
+                } else {
+                    if (response.status >= 500) {
+                        const error = new Error('服务器错误')
+                        error.response = response
+                        throw error
+                    }
+                }
+            })
+            .then((response) => {
+                return response.json()
+            })
+            .then((result) => {
+                if (result['success']) {
+                    ipcRenderer.send('upload-file', {
+                        fileList: fileList,
+                    })
+                    this.closeAddTaskWin()
+                } else {
+                    const error = new Error('未知错误')
+                    throw error
+                }
+            })
+            .catch((error) => {
+                if (error.message === 'Failed to fetch') {
+                    ipcRenderer.send('open-add-task-error-msg-win', '网络错误')
+                } else {
+                    ipcRenderer.send('open-add-task-error-msg-win', error.message)
+                }
+            })
+    }
+
     closeAddTaskWin() {
         ipcRenderer.send('close-add-task-win')
     }
@@ -184,7 +238,7 @@ class AddTask extends React.Component {
             },
         }
 
-        const { dragging, fileList, nodeType } = this.state
+        const { dragging, fileList, nodeType, nodeNum } = this.state
 
         const dropzone = (
             <div
@@ -311,7 +365,7 @@ class AddTask extends React.Component {
                     </div>
                     <div style={styles.itemContainer}>
                         <h4>节点个数</h4>
-                        <InputNumber min={1} max={100} defaultValue={8} onChange={this.setNodeNum} />
+                        <InputNumber min={1} max={100} value={nodeNum} onChange={this.setNodeNum} />
                     </div>
                 </div>
                 <div
@@ -326,7 +380,7 @@ class AddTask extends React.Component {
                     className='add-task-footer'
                     style={styles.footer}
                 >
-                    <Button type="primary">提交</Button>
+                    <Button type="primary" onClick={this.submitTask}>提交</Button>
                 </div>
             </div>
         )

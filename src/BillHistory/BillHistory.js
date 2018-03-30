@@ -87,7 +87,7 @@ class BillHistory extends React.Component {
     }
 
     componentDidMount() {
-        ipcRenderer.send('ready-to-show')
+        ipcRenderer.send('bill-history-ready-to-show')
 
         ipcRenderer.on('user-info', (event, args) => {
             log('user-info', args)

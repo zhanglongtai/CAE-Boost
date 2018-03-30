@@ -1,28 +1,35 @@
 import React from "react"
-import PropTypes from "prop-types"
+// import PropTypes from "prop-types"
 import Button from "antd/lib/button"
 
 import log from "../util/log"
 
 const { ipcRenderer } = window.require("electron")
 
-class PayResult extends React.Component {
+class AddTaskErrorMsg extends React.Component {
     constructor(props) {
         super(props)
+
+        this.state = {
+            errorMsg: '',
+        }
     }
 
     componentDidMount() {
-        this.timer = setTimeout(() => {
-            this.props.closeChargeWin()
-        }, 3000)
+        ipcRenderer.send('add-task-error-msg-ready-to-show')
+        ipcRenderer.on('error-msg', (event, errorMsg) => {
+            this.setState({
+                errorMsg: errorMsg,
+            })
+        })
     }
 
-    componentWillUnmount() {
-        clearTimeout(this.timer)
+    closeAddTaskErrorMsg() {
+        ipcRenderer.send('close-add-task-error-msg-win')
     }
 
     render() {
-        const { amount } = this.props
+        const { errMsg } = this.state
 
         return (
             <div
@@ -34,7 +41,7 @@ class PayResult extends React.Component {
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}
-                className='login-form-content'
+                className='add-task-error-msg'
             >
                 <div
                     style={{
@@ -49,19 +56,26 @@ class PayResult extends React.Component {
                         style={{
                             fontSize: 40,
                             margin: '0 10px 0 0',
-                            color: 'green',
+                            color: 'gray',
                         }}
-                    >done</i>
-                    <h3 style={{margin: 0}}>{`已充值成功￥${amount}!`}</h3>
+                    >error_outline</i>
+                    <h3 style={{margin: 0}}>{errMsg}，请尝试重新提交任务。</h3>
                 </div>
+                <Button
+                    type="primary"
+                    style={{width: '100px'}}
+                    onClick={this.closeAddTaskErrorMsg}
+                >
+                    确认
+                </Button>
             </div>
         )
     }
 }
 
-PayResult.propTypes = {
-    amount: PropTypes.string.isRequired,
-    closeChargeWin: PropTypes.func.isRequired,
-}
+// AddTaskErrorMsg.propTypes = {
+//     amount: PropTypes.string.isRequired,
+//     closeChargeWin: PropTypes.func.isRequired,
+// }
 
-export default PayResult
+export default AddTaskErrorMsg

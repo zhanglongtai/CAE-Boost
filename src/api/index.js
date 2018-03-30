@@ -8,6 +8,7 @@ import {
     getTaskAPI,
     getChargeAPI,
     getCheckPayAPI,
+    getSubmitTaskAPI,
 } from "./api"
 
 export {
@@ -20,4 +21,5 @@ export {
     getTaskAPI,
     getChargeAPI,
     getCheckPayAPI,
+    getSubmitTaskAPI,
 }

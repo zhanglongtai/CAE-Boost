@@ -52,7 +52,7 @@ class Register extends React.Component {
     }
 
     componentDidMount() {
-        ipcRenderer.send('ready-to-show')
+        ipcRenderer.send('register-ready-to-show')
     }
 
     navToRegister() {

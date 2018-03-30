@@ -32,6 +32,14 @@ const getTaskAPI = function(taskID) {
     }
 }
 
+const getSubmitTaskAPI = function() {
+    if (config.env === 'dev') {
+        return `${config.testSubmitTaskURL}`
+    } else {
+        return `${config.baseURL}/task`
+    }
+}
+
 const getResidualAPI = function() {
     const protocol = config.baseURL.split("/")[0]
     const host = config.baseURL.split("/")[2]
@@ -80,4 +88,5 @@ export {
     getTaskAPI,
     getChargeAPI,
     getCheckPayAPI,
+    getSubmitTaskAPI,
 }

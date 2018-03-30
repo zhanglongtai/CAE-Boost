@@ -9,6 +9,7 @@ const StoreConfig = require("./main-lib/storeConfig")
 
 const config = {
     env: 'dev', // 'dev' or 'prod'
+    addTaskErrorMsg: '',
 }
 
 let reactDevtool = null
@@ -17,7 +18,7 @@ switch (process.platform) {
         reactDevtool = '/home/tiger/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/2.3.3_0'
         break
     case 'win32':
-        reactDevtool = 'C:\\Users\\Tiger\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi\\3.2.0_0'
+        reactDevtool = 'C:\\Users\\Tiger\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi\\3.2.1_0'
         break
 }
 
@@ -28,6 +29,7 @@ const win = {
     winMainView: null,
     winTestDownload: null,
     winAddTask: null,
+    winAddTaskErrorMsg: null,
     winNodeTypeSelector: null,
     winCharge: null,
     winBillHistory: null,
@@ -160,12 +162,6 @@ const createLoginWin = function() {
 
     win.winLogin.loadURL(`file://${__dirname}/renderer/login.html`)
 
-    win.winLogin.on('ready-to-show', () => {
-        closeRegisterWin()
-        closeMainView()
-        win.winLogin.show()
-    })
-
     win.winLogin.on('closed', () => {
         win.winLogin = null
     })
@@ -176,6 +172,12 @@ const closeLoginWin = function() {
         win.winLogin.close()
     }
 }
+
+ipcMain.on('login-ready-to-show', () => {
+    closeRegisterWin()
+    closeMainView()
+    win.winLogin.show()
+})
 
 ipcMain.on('close-login-win-open-main-view-win', (event, args) => {
     const { username, accessToken, refreshToken, autoLogin } = args
@@ -218,11 +220,6 @@ const createRegisterWin = function() {
 
     win.winRegister.loadURL(`file://${__dirname}/renderer/register.html`)
 
-    win.winRegister.on('ready-to-show', () => {
-        closeLoginWin()
-        win.winRegister.show()
-    })
-
     win.winRegister.on('closed', () => {
         win.winRegister = null
     })
@@ -233,6 +230,11 @@ const closeRegisterWin = function() {
         win.winRegister.close()
     }
 }
+
+ipcMain.on('register-ready-to-show', () => {
+    closeLoginWin()
+    win.winRegister.show()
+})
 
 ipcMain.on('close-register-win-open-login-win', () => {
     win.winRegister.hide()
@@ -273,21 +275,6 @@ const createMainViewWin = function() {
 
     win.winMainView.loadURL(`file://${__dirname}/renderer/mainView.html`)
 
-    win.winMainView.on('ready-to-show', () => {
-        closeLoginWin()
-        closeRegisterWin()
-
-        const storeConfig = new StoreConfig()
-        const username = storeConfig.get('username')
-        const accessToken = storeConfig.get('access-token')
-
-        win.winMainView.webContents.send('user-info', {
-            username: username,
-            accessToken: accessToken,
-        })
-        win.winMainView.show()
-    })
-
     win.winMainView.on('closed', () => {
         win.winMainView = null
     })
@@ -298,6 +285,21 @@ const closeMainView = function() {
         win.winMainView.close()
     }
 }
+
+ipcMain.on('main-view-ready-to-show', () => {
+    closeLoginWin()
+    closeRegisterWin()
+
+    const storeConfig = new StoreConfig()
+    const username = storeConfig.get('username')
+    const accessToken = storeConfig.get('access-token')
+
+    win.winMainView.webContents.send('user-info', {
+        username: username,
+        accessToken: accessToken,
+    })
+    win.winMainView.show()
+})
 
 ipcMain.on('close-main-view-win-open-login-win', () => {
     const storeConfig = new StoreConfig()
@@ -325,10 +327,14 @@ ipcMain.on('restore-main-view-win', () => {
 ipcMain.on('close-main-view-win', () => {
     win.winMainView.close()
 })
+
+ipcMain.on('update-bill', () => {
+    win.winMainView.webContents.send('update-bill')
+})
 // ========= MainView ==========
 
 
-// ========= AddTask ==========
+// ========== AddTask ==========
 const createAddTaskWin = function() {
     const options = {
         width: 600,
@@ -359,7 +365,49 @@ ipcMain.on('open-add-task-win', () => {
 ipcMain.on('close-add-task-win', () => {
     win.winAddTask.close()
 })
-// ========= AddTask ==========
+// ========== AddTask ==========
+
+
+// ========== AddTaskErrorMsg ==========
+const createAddTaskErrorMsgWin = function() {
+    const options = {
+        width: 400,
+        height: 400,
+        frame: false,
+        show: false,
+        parent: win.winAddTask,
+        modal: true,
+    }
+
+    win.winAddTaskErrorMsg = new BrowserWindow(options)
+
+    if (config.env === 'dev') {
+        win.winAddTaskErrorMsg.webContents.openDevTools()
+    }
+
+    win.winAddTaskErrorMsg.loadURL(`file://${__dirname}/renderer/addTaskErrorMsg.html`)
+
+    win.winAddTaskErrorMsg.on('closed', () => {
+        win.winAddTaskErrorMsg = null
+    })
+}
+
+ipcMain.on('add-task-error-msg-ready-to-show', () => {
+    win.winAddTaskErrorMsg.webContents.send('error-msg', {
+        errorMsg: config.addTaskErrorMsg,
+    })
+    win.winAddTaskErrorMsg.show()
+})
+
+ipcMain.on('open-add-task-error-msg-win', (event, msg) => {
+    config.addTaskErrorMsg = msg
+    createAddTaskErrorMsgWin()
+})
+
+ipcMain.on('close-add-task-error-msg-win', () => {
+    win.winAddTaskErrorMsg.close()
+})
+// ========== AddTaskErrorMsg ==========
 
 
 // ========== NodeTypeSelector ==========
@@ -454,22 +502,22 @@ const createBillHistoryWin = function() {
 
     win.winBillHistory.loadURL(`file://${__dirname}/renderer/billHistory.html`)
 
-    win.winBillHistory.on('ready-to-show', () => {
-        const storeConfig = new StoreConfig()
-        const username = storeConfig.get('username')
-        const accessToken = storeConfig.get('access-token')
-
-        win.winBillHistory.webContents.send('user-info', {
-            username: username,
-            accessToken: accessToken,
-        })
-        win.winBillHistory.show()
-    })
-
     win.winBillHistory.on('closed', () => {
         win.winBillHistory = null
     })
 }
+
+ipcMain.on('bill-history-ready-to-show', () => {
+    const storeConfig = new StoreConfig()
+    const username = storeConfig.get('username')
+    const accessToken = storeConfig.get('access-token')
+
+    win.winBillHistory.webContents.send('user-info', {
+        username: username,
+        accessToken: accessToken,
+    })
+    win.winBillHistory.show()
+})
 
 ipcMain.on('open-bill-history-win', () => {
     createBillHistoryWin()
@@ -479,3 +527,6 @@ ipcMain.on('close-bill-history-win', () => {
     win.winBillHistory.close()
 })
 // ========= Charge ==========
+
+
+// ========== Upload File ==========
