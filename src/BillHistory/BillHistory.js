@@ -146,22 +146,24 @@ class BillHistory extends React.Component {
                 return response.json()
             })
             .then((result) => {
-                const balance = result['balance']
-                const voucher = result['voucher']
-                const chargeRecord = result['charge-record']
-                const consumeRecord = result['consume-record']
+                if (result['success']) {
+                    const balance = result['data']['balance']
+                    const voucher = result['data']['voucher']
+                    const chargeRecord = result['data']['chargeRecord']
+                    const consumeRecord = result['data']['consumeRecord']
 
-                this.setState({
-                    bill: {
-                        isFetching: false,
-                        success: true,
-                        balance: balance,
-                        voucher: voucher,
-                        chargeRecord: formattedChargeList(chargeRecord),
-                        consumeRecord: formattedConsumeList(consumeRecord),
-                        errorMsg: '',
-                    },
-                })
+                    this.setState({
+                        bill: {
+                            isFetching: false,
+                            success: true,
+                            balance: balance,
+                            voucher: voucher,
+                            chargeRecord: formattedChargeList(chargeRecord),
+                            consumeRecord: formattedConsumeList(consumeRecord),
+                            errorMsg: '',
+                        },
+                    })
+                }
             })
             .catch((error) => {
                 log(error)

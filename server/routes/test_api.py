@@ -147,11 +147,15 @@ def task_list():
         time.sleep(1)
 
         return jsonify({
-            'TaskList': fake_data,
+            'data': fake_data,
+            'success': True,
         })
 
     def case2():
-        return jsonify({'TaskList': []})
+        return jsonify({
+            'data': [],
+            'success': True,
+        })
 
     def case3():
         return Response(status=500)
@@ -165,7 +169,36 @@ def task_list():
     return switch[1]()
 
 
-@test_api.route('/task/<string:task_id>')
+@test_api.route('/task', methods=['POST'])
+def submit_task():
+    data = request.data
+    data = json.loads(data)
+
+    print(data)
+
+    # response case code
+    # 1 - accepted
+    # 3 - server error
+
+    def case1():
+        time.sleep(2)
+
+        return jsonify({
+            'success': True,
+        })
+
+    def case2():
+        return Response(status=500)
+
+    switch = {
+        1: case1,
+        2: case2,
+    }
+
+    return switch[1]()
+
+
+@test_api.route('/task/<string:task_id>', methods=['GET'])
 def task(task_id):
     print('task_id', task_id)
 
@@ -211,22 +244,25 @@ def bill():
 
     def case1():
         return jsonify({
-            'balance': '100.00',
-            'voucher': '200.00',
-            'charge-record': [
-                {'time': '2018-03-22 12:00', 'amount': '100.00', 'channel': 'alipay', 'trade-id': 'd905acb0'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
-            ],
-            'consume-record': [
-                {'time': '2018-03-22 18:00', 'amount': '100.00', 'task-name': 'Fluent测试', 'task-id': 'd905acb0', 'trade-id': 'd905acb0'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
-                {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
-            ],
+            'data': {
+                'balance': '100.00',
+                'voucher': '200.00',
+                'chargeRecord': [
+                    {'time': '2018-03-22 12:00', 'amount': '100.00', 'channel': 'alipay', 'trade-id': 'd905acb0'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'channel': 'wxpay', 'trade-id': 'f27ecb2e'},
+                ],
+                'consumeRecord': [
+                    {'time': '2018-03-22 18:00', 'amount': '100.00', 'task-name': 'Fluent测试', 'task-id': 'd905acb0', 'trade-id': 'd905acb0'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
+                    {'time': '2018-03-23 14:00', 'amount': '200.00', 'task-name': 'SU2测试', 'task-id': 'f27ecb2e', 'trade-id': 'f27ecb2e'},
+                ],
+            },
+            'success': True,
         })
 
     def case2():

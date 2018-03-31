@@ -29,13 +29,13 @@ class AddTaskErrorMsg extends React.Component {
     }
 
     render() {
-        const { errMsg } = this.state
+        const { errorMsg } = this.state
 
         return (
             <div
                 style={{
-                    width: '300px',
-                    height: '300px',
+                    width: '400px',
+                    height: '200px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -59,7 +59,7 @@ class AddTaskErrorMsg extends React.Component {
                             color: 'gray',
                         }}
                     >error_outline</i>
-                    <h3 style={{margin: 0}}>{errMsg}，请尝试重新提交任务。</h3>
+                    <h3 style={{margin: 0}}>{errorMsg}，请尝试重新提交任务。</h3>
                 </div>
                 <Button
                     type="primary"

@@ -96,16 +96,19 @@ class Header extends React.Component {
                 return response.json()
             })
             .then((result) => {
-                this.setState({
-                    account: {
-                        isFetching: false,
-                        success: true,
-                        balance: result['balance'],
-                        voucher: result['voucher'],
-                        chargeRecord: result['charge-record'],
-                        consumeRecord: result['consume-record'],
-                    },
-                })
+                if (result['success']) {
+                    this.setState({
+                        account: {
+                            isFetching: false,
+                            success: true,
+                            balance: result['data']['balance'],
+                            voucher: result['data']['voucher'],
+                            chargeRecord: result['data']['chargeRecord'],
+                            consumeRecord: result['data']['consumeRecord'],
+                        },
+                    })
+                }
+                
             })
             .catch((error) => {
                 log(error)

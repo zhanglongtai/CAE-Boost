@@ -36,6 +36,7 @@ class Charge extends React.Component {
         this.sendOrder = this.sendOrder.bind(this)
         this.navTo = this.navTo.bind(this)
         this.navToErrorMsg = this.navToErrorMsg.bind(this)
+        this.closeChargeWin = this.closeChargeWin.bind(this)
     }
 
     componentDidMount() {

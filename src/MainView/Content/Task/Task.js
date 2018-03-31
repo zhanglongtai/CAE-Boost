@@ -143,16 +143,18 @@ class Task extends React.Component {
                 return response.json()
             })
             .then((result) => {
-                const list = result['TaskList']
-                const newList = formattedData(list)
-                this.setState({
-                    taskList: {
-                        isFetching: false,
-                        success: true,
-                        list: newList,
-                        errorMsg: '',
-                    },
-                })
+                if (result['success']) {
+                    const list = result['data']
+                    const newList = formattedData(list)
+                    this.setState({
+                        taskList: {
+                            isFetching: false,
+                            success: true,
+                            list: newList,
+                            errorMsg: '',
+                        },
+                    })
+                }
             })
             .catch((error) => {
                 log(error)

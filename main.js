@@ -343,6 +343,7 @@ const createAddTaskWin = function() {
         // resizable: false,
         parent: win.winMainView,
         modal: true,
+        show: false,
     }
 
     win.winAddTask = new BrowserWindow(options)
@@ -358,6 +359,16 @@ const createAddTaskWin = function() {
     })
 }
 
+ipcMain.on('add-task-ready-to-show', () => {
+    const storeConfig = new StoreConfig()
+    const accessToken = storeConfig.get('access-token')
+
+    win.winAddTask.webContents.send('user-info', {
+        accessToken: accessToken,
+    })
+    win.winAddTask.show()
+})
+
 ipcMain.on('open-add-task-win', () => {
     createAddTaskWin()
 })
@@ -372,7 +383,7 @@ ipcMain.on('close-add-task-win', () => {
 const createAddTaskErrorMsgWin = function() {
     const options = {
         width: 400,
-        height: 400,
+        height: 200,
         frame: false,
         show: false,
         parent: win.winAddTask,
@@ -393,9 +404,7 @@ const createAddTaskErrorMsgWin = function() {
 }
 
 ipcMain.on('add-task-error-msg-ready-to-show', () => {
-    win.winAddTaskErrorMsg.webContents.send('error-msg', {
-        errorMsg: config.addTaskErrorMsg,
-    })
+    win.winAddTaskErrorMsg.webContents.send('error-msg', config.addTaskErrorMsg)
     win.winAddTaskErrorMsg.show()
 })
 
@@ -530,3 +539,4 @@ ipcMain.on('close-bill-history-win', () => {
 
 
 // ========== Upload File ==========
+ipcMain.on('upload-file', (event, fileList) => {})

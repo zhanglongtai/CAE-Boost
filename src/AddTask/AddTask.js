@@ -19,6 +19,7 @@ class AddTask extends React.Component {
         super(props)
 
         this.state = {
+            accessToken: '',
             dragging: false,
             taskName: '',
             solver: '',
@@ -45,6 +46,14 @@ class AddTask extends React.Component {
     }
 
     componentDidMount() {
+        ipcRenderer.send('add-task-ready-to-show')
+
+        ipcRenderer.on('user-info', (event, args) => {
+            this.setState({
+                accessToken: args['accessToken'],
+            })
+        })
+
         ipcRenderer.on('submit-node-type', (event, args) => {
             this.setNodeType(args.nodeTypeIndex, args.nodeType)
         })
@@ -139,21 +148,106 @@ class AddTask extends React.Component {
         })
     }
 
+    validatedTaskName(taskName) {
+        // taskName is empty
+        if (taskName === '') {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    validatedSolver(solver) {
+        // solver is empty
+        if (solver === '') {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    validatedFileList(fileList) {
+        // fileList is empty
+        if (fileList.length === 0) {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    validatedNodeType(nodeType) {
+        // nodeType is empty
+        if (nodeType === '') {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    validatedNodeNum(nodeNum) {
+        // nodeNum is empty
+        if (nodeNum === 0) {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    validatedTaskInput(taskName, solver, fileList, nodeType, nodeNum) {
+        if (this.validatedTaskName(taskName) === false) {
+            ipcRenderer.send('open-add-task-error-msg-win', '任务未命名')
+            return false
+        }
+
+        if (this.validatedSolver(solver) === false) {
+            ipcRenderer.send('open-add-task-error-msg-win', '未选择求解器')
+            return false
+        }
+
+        if (this.validatedFileList(fileList) === false) {
+            ipcRenderer.send('open-add-task-error-msg-win', '未选择计算文件')
+            return false
+        }
+
+        if (this.validatedNodeType(nodeType) === false) {
+            ipcRenderer.send('open-add-task-error-msg-win', '未选择节点类型')
+            return false
+        }
+
+        if (this.validatedNodeNum(nodeNum) === false) {
+            ipcRenderer.send('open-add-task-error-msg-win', '未选择节点数量')
+            return false
+        }
+
+        return true
+    }
+
     submitTask() {
-        const { taskName, solver, fileList, nodeType, nodeNum } = this.state
+        const { taskName, solver, nodeType, nodeNum, accessToken } = this.state
+
+        let fileList = this.state.fileList
+        fileList = fileList.map((item) => {
+            return item['fileName']
+        })
+
+        if (this.validatedTaskInput(taskName, solver, fileList, nodeType, nodeNum) === false) {
+            return false
+        }
 
         const url = `${getSubmitTaskAPI()}`
         fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-                taskName: taskName,
-                solver: solver,
-                fileList: fileList,
-                nodeType: nodeType,
-                nodeNum: nodeNum,
+                'taskName': taskName,
+                'solver': solver,
+                'taskFile': JSON.stringify(fileList),
+                'nodeType': nodeType,
+                'nodeNum': nodeNum,
+                'cpuNum': nodeNum,
             }),
         })
             .then((response) => {
@@ -172,9 +266,7 @@ class AddTask extends React.Component {
             })
             .then((result) => {
                 if (result['success']) {
-                    ipcRenderer.send('upload-file', {
-                        fileList: fileList,
-                    })
+                    ipcRenderer.send('upload-file', fileList)
                     this.closeAddTaskWin()
                 } else {
                     const error = new Error('未知错误')
@@ -332,9 +424,9 @@ class AddTask extends React.Component {
                     <div style={styles.itemContainer}>
                         <h4>求解器</h4>
                         <Select placeholder="选择求解器" style={{width: '100%'}} onChange={this.setSolver}>
-                            <Option value="fluent">Fluent</Option>
-                            <Option value="su2">SU2</Option>
-                            <Option value="openfoam">OpenFoam</Option>
+                            <Option value="FLUENT">Fluent</Option>
+                            <Option value="SU2">SU2</Option>
+                            <Option value="OPENFOAM">OpenFoam</Option>
                         </Select>
                     </div>
                     <div style={styles.itemContainer}>
