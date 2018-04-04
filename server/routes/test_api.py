@@ -4,9 +4,13 @@ from flask import (
     jsonify,
     Response,
 )
+from werkzeug.utils import secure_filename
+import os
 import time
 import json
 import random
+
+from config import UPLOAD_FOLDER
 
 test_api = Blueprint('test_api', __name__)
 
@@ -371,3 +375,17 @@ def check_pay(trade_id):
     }
 
     return switch[1]()
+
+
+@test_api.route('/upload', methods=["POST"])
+def upload():
+    print('run api upload')
+    # u = current_user()
+
+    # file 是一个上传的文件对象
+    file = request.files['file']
+    filename = secure_filename(file.filename)
+
+    file.save(os.path.join(UPLOAD_FOLDER, filename))
+
+    return Response()

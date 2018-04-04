@@ -6,10 +6,12 @@ const {
 } = require("electron")
 
 const StoreConfig = require("./main-lib/storeConfig")
+const UploadFile = require("./main-lib/uploadFile")
 
 const config = {
     env: 'dev', // 'dev' or 'prod'
     addTaskErrorMsg: '',
+    uploadURL: 'http://127.0.0.1:3000/api/upload',
 }
 
 let reactDevtool = null
@@ -458,7 +460,7 @@ ipcMain.on('submit-node-type', (event, args) => {
 // ========== NodeTypeSelector ==========
 
 
-// ========= Charge ==========
+// ========== Charge ==========
 const createChargeWin = function() {
     const options = {
         width: 500,
@@ -489,10 +491,10 @@ ipcMain.on('open-charge-win', () => {
 ipcMain.on('close-charge-win', () => {
     win.winCharge.close()
 })
-// ========= Charge ==========
+// ========== Charge ==========
 
 
-// ========= BillHistroy ==========
+// ========== BillHistroy ==========
 const createBillHistoryWin = function() {
     const options = {
         width: 500,
@@ -535,8 +537,26 @@ ipcMain.on('open-bill-history-win', () => {
 ipcMain.on('close-bill-history-win', () => {
     win.winBillHistory.close()
 })
-// ========= Charge ==========
+// ========== Charge ==========
 
 
 // ========== Upload File ==========
-ipcMain.on('upload-file', (event, fileList) => {})
+const updateUploadFile = function(allFile) {
+    // allFile = {uploadList: [...], finishedList: [...]}
+    log('send')
+    log(win.winMainView.webContents)
+    win.winMainView.webContents.send('update-upload-file', allFile)
+}
+
+const uploadFile = new UploadFile(updateUploadFile)
+
+ipcMain.on('upload-file', (event, args) => {
+    const { fileList, taskName } = args
+    fileList.forEach((item) => {
+        const { fileName, filePath, fileSize } = item
+        const uploadURL = config.uploadURL
+
+        uploadFile.upload(uploadURL, fileName, filePath, fileSize, taskName)
+    })
+})
+// ========== Upload File ==========

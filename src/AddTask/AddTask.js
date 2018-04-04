@@ -92,7 +92,8 @@ class AddTask extends React.Component {
         const fileList = this.state.fileList.slice()
         for (const file of files) {
             const fileName = file.name
-            const fileSize = formattedSize(file.size)
+            // const fileSize = formattedSize(file.size)
+            const fileSize = file.size
             const filePath = file.path
             fileList.push({
                 fileName: fileName,
@@ -223,14 +224,13 @@ class AddTask extends React.Component {
     }
 
     submitTask() {
-        const { taskName, solver, nodeType, nodeNum, accessToken } = this.state
+        const { taskName, solver, nodeType, nodeNum, accessToken, fileList } = this.state
 
-        let fileList = this.state.fileList
-        fileList = fileList.map((item) => {
+        const taskFile = fileList.map((item) => {
             return item['fileName']
         })
 
-        if (this.validatedTaskInput(taskName, solver, fileList, nodeType, nodeNum) === false) {
+        if (this.validatedTaskInput(taskName, solver, taskFile, nodeType, nodeNum) === false) {
             return false
         }
 
@@ -244,7 +244,7 @@ class AddTask extends React.Component {
             body: JSON.stringify({
                 'taskName': taskName,
                 'solver': solver,
-                'taskFile': JSON.stringify(fileList),
+                'taskFile': JSON.stringify(taskFile),
                 'nodeType': nodeType,
                 'nodeNum': nodeNum,
                 'cpuNum': nodeNum,
@@ -266,7 +266,10 @@ class AddTask extends React.Component {
             })
             .then((result) => {
                 if (result['success']) {
-                    ipcRenderer.send('upload-file', fileList)
+                    ipcRenderer.send('upload-file', {
+                        fileList: fileList,
+                        taskName: taskName,
+                    })
                     this.closeAddTaskWin()
                 } else {
                     const error = new Error('未知错误')
