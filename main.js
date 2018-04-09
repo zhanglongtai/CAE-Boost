@@ -543,8 +543,6 @@ ipcMain.on('close-bill-history-win', () => {
 // ========== Upload File ==========
 const updateUploadFile = function(allFile) {
     // allFile = {uploadList: [...], finishedList: [...]}
-    log('send')
-    log(win.winMainView.webContents)
     win.winMainView.webContents.send('update-upload-file', allFile)
 }
 

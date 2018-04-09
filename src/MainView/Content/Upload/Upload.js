@@ -1,11 +1,11 @@
 import React from "react"
-// import PropTypes from "prop-types"
+import PropTypes from "prop-types"
 import Table from "antd/lib/table"
 import Divider from "antd/lib/divider"
 
 import log from "../../../util/log"
 
-const { ipcRenderer } = window.require("electron")
+// const { ipcRenderer } = window.require("electron")
 
 const fakeData = [
     {
@@ -30,111 +30,18 @@ const fakeData = [
     },
 ]
 
-const formattedUploadList = function(list) {
-    return list.map((item, index) => {
-        const formattedSize = function(fileSize) {
-            let size = fileSize
-            let unit = "B"
-            if (size >= 1024*1024) {
-                size = Math.round(size / 1024 / 1024)
-                unit = "MB"
-            } else if (size >= 1024){
-                unit = "KB"
-                size = Math.round(size / 1024)
-            } else {
-                size = Math.round(size)
-            }
-
-            return `${size} ${unit}`
-        }
-
-        const key = index
-        const fileName = item.fileName
-        const state = 'uploading'
-        const taskName = item.taskName
-        
-        let percent
-        if (item.chunkSize.total !==0 ) {
-            percent = (item.chunkSize.uploaded / item.chunkSize.total * 100).toFixed(1)
-        } else {
-            percent = '-'
-        }
-
-        const speed = item.speed
-        const size = formattedSize(item.fileSize)
-
-        return {
-            key: key,
-            fileName: fileName,
-            state: state,
-            taskName: taskName,
-            percent: percent,
-            speed: speed,
-            size: size,
-        }
-    })
-}
-
-const formattedFinishedList = function(list) {
-    return list.map((item, index) => {
-        const formattedSize = function(fileSize) {
-            let size = fileSize
-            let unit = "B"
-            if (size >= 1024*1024) {
-                size = Math.round(size / 1024 / 1024)
-                unit = "MB"
-            } else if (size >= 1024){
-                unit = "KB"
-                size = Math.round(size / 1024)
-            } else {
-                size = Math.round(size)
-            }
-
-            return `${size} ${unit}`
-        }
-
-        const key = index
-        const fileName = item.fileName
-        const state = 'finished'
-        const taskName = item.taskName
-        const percent = '-'
-        const speed = '-'
-        const size = formattedSize(item.fileSize)
-
-        return {
-            key: key,
-            fileName: fileName,
-            state: state,
-            taskName: taskName,
-            percent: percent,
-            speed: speed,
-            size: size,
-        }
+const formatListKey = function(list) {
+    list.forEach((item, index) => {
+        item.key = index
     })
 }
 
 class Upload extends React.Component {
-    constructor() {
-        super()
-
-        this.state = {
-            uploadList: [],
-            finishedList: [],
-        }
+    constructor(props) {
+        super(props)
     }
 
-    componentDidMount() {
-        ipcRenderer.on('update-upload-file', (event, args) => {
-            log('receive-allfile', args)
-            const uploadList = formattedUploadList(args.uploadList)
-            const finishedList = formattedFinishedList(args.finishedList)
-
-            this.setState({
-                uploadList: uploadList,
-                finishedList: finishedList,
-            })
-        })
-    }
+    componentDidMount() {}
 
     render() {
         const styles = {
@@ -155,6 +62,7 @@ class Upload extends React.Component {
                 title: '状态',
                 dataIndex: 'state',
                 key: 'state',
+                width: 100,
                 render: (text) => {
                     switch(text) {
                         case 'uploading':
@@ -187,20 +95,24 @@ class Upload extends React.Component {
                 title: '文件大小',
                 dataIndex: 'size',
                 key: 'size',
+                width: 100,
             },
             {
                 title: '进度',
                 dataIndex: 'percent',
                 key: 'percent',
+                width: 100,
             },
             {
                 title: '速度',
                 dataIndex: 'speed',
                 key: 'speed',
+                width: 100,
             },
             {
                 title: '操作',
                 key: 'action',
+                width: 100,
                 render: (text, item) => {
                     switch (item.state) {
                         case 'uploading':
@@ -222,9 +134,10 @@ class Upload extends React.Component {
             },
         ]
 
-        const { uploadList, finishedList } = this.state
+        const { uploadList, finishedList } = this.props
 
         const listData = uploadList.concat(finishedList)
+        formatListKey(listData)
 
         return (
             <div
@@ -241,8 +154,9 @@ class Upload extends React.Component {
     }
 }
 
-// Upload.propTypes = {
-//     taskID: PropTypes.string.isRequired,
-// }
+Upload.propTypes = {
+    uploadList: PropTypes.array.isRequired,
+    finishedList: PropTypes.array.isRequired,
+}
 
 export default Upload
