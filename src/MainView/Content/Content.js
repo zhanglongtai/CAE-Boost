@@ -110,6 +110,44 @@ const formattedFinishedList = function(list) {
     })
 }
 
+const formattedFailList = function(list) {
+    return list.map((item, index) => {
+        const formattedSize = function(fileSize) {
+            let size = fileSize
+            let unit = "B"
+            if (size >= 1024*1024) {
+                size = Math.round(size / 1024 / 1024)
+                unit = "MB"
+            } else if (size >= 1024){
+                unit = "KB"
+                size = Math.round(size / 1024)
+            } else {
+                size = Math.round(size)
+            }
+
+            return `${size} ${unit}`
+        }
+
+        const key = index
+        const fileName = item.fileName
+        const state = 'fail'
+        const taskName = item.taskName
+        const percent = '-'
+        const speed = '-'
+        const size = formattedSize(item.fileSize)
+
+        return {
+            key: key,
+            fileName: fileName,
+            state: state,
+            taskName: taskName,
+            percent: percent,
+            speed: speed,
+            size: size,
+        }
+    })
+}
+
 class Content extends React.Component {
     constructor() {
         super()
@@ -128,10 +166,12 @@ class Content extends React.Component {
             log('receive-allfile', args)
             const uploadList = formattedUploadList(args.uploadList)
             const finishedList = formattedFinishedList(args.finishedList)
+            const failList = formattedFailList(args.failList)
 
             this.setState({
                 uploadList: uploadList,
                 finishedList: finishedList,
+                failList: failList,
             })
         })
     }
@@ -154,7 +194,7 @@ class Content extends React.Component {
             },
         }
 
-        const { contentIndex, uploadList, finishedList } = this.state
+        const { contentIndex, uploadList, finishedList, failList } = this.state
 
         let content
         switch (contentIndex) {
@@ -162,6 +202,7 @@ class Content extends React.Component {
                 content = <Upload
                     uploadList={uploadList}
                     finishedList={finishedList}
+                    failList={failList}
                 />
                 break
             case 1:

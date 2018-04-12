@@ -1,7 +1,7 @@
-const fs = require('fs')
+const fs = require("fs")
 const request = require("request")
-const FormData = require('form-data')
-const s3 = require("s3")
+const FormData = require("form-data")
+const S3Client = require("./s3Client")
 
 // ========== util func ==========
 const log = function() {
@@ -33,9 +33,7 @@ class UploadFile {
         }
     }
 
-    upload(uploadURL, remoteFilePath, fileName, filePath, fileSize, taskName) {
-        const that = this
-
+    upload(uploadURL, fileName, filePath, fileSize, taskName) {
         const uploadRawHttp = function(self, uploadURL, fileName, filePath, fileSize, taskName) {
             const uuid = `${taskName}-${fileName}`
 
@@ -173,7 +171,7 @@ class UploadFile {
                     fileName: fileName,
                     filePath: filePath,
                     speed: 0,
-                    chunkSize: { total: 0, uploaded: 0, lastUpdateUploaded: 0 },
+                    chunkSize: { total: fileSize, uploaded: 0, lastUpdateUploaded: 0 },
                     fileSize: fileSize,
                     lastUpdateTime: startTime,
                     remainingTime: 0,
@@ -185,41 +183,64 @@ class UploadFile {
             
             pushToUploadList(uuid)
 
-            const client = s3.createClient({
-                maxAsyncS3: 20,     // this is the default
-                s3RetryCount: 3,    // this is the default
-                s3RetryDelay: 1000, // this is the default
-                multipartUploadThreshold: 20971520, // this is the default (20 MB)
-                multipartUploadSize: 15728640, // this is the default (15 MB)
-                s3Options: {
-                    accessKeyId: "N3Z92X0RX6J4FXQ70JHX",
-                    secretAccessKey: "AVdNLrkNdd72uM3XbIvfJ8YAe6lsz5zGrTgk8KuG",
-                    endpoint: 'http://10.0.0.11:7480',
-                    s3ForcePathStyle: true,
-                },
+            const s3 = new S3Client({
+                accessKeyId: 'N3Z92X0RX6J4FXQ70JHX',
+                secretAccessKey: 'AVdNLrkNdd72uM3XbIvfJ8YAe6lsz5zGrTgk8KuG',
+                endpoint: 'http://10.0.0.11:7480 ',
+                s3ForcePathStyle: true,
+                signatureVersion: 'v2',
             })
 
-            const uploader = client.uploadFile({
-                localFile: filePath,
-                s3Params: {
-                    Bucket: "upload-test",
-                    Key: fileName,
-                },
-            })
+            const listener = s3.uploadFile(filePath, fileName, 'upload-test')
 
             const getKey = function (key) {
                 return key
             }
 
             self.requestList.push({
-                [getKey(uuid)]: uploader,
+                [getKey(uuid)]: listener,
             })
 
-            uploader.on('error', (err) => {
-                console.error("unable to upload:", err.stack)
+            listener.on('upload-error', (err) => {
+                log("upload-error", err)
+
+                const removeUploadInstance = function(uuid) {
+                    for (let i = 0; i < self.uploadList.length; i++) {
+                        if (self.uploadList[i]['uuid'] === uuid) {
+                            self.uploadList = self.uploadList.slice(0, i).concat(self.uploadList.slice(i + 1))
+                            break
+                        }
+                    }
+                }
+
+                const addFailInstance = function(uploadURL, taskName, fileName, filePath, fileSize) {
+                    const failInstance = {
+                        uploadURL: uploadURL,
+                        taskName: taskName,
+                        fileName: fileName, 
+                        fileSize: fileSize,
+                        filePath: filePath,
+                    }
+
+                    self.finishedList.push(failInstance)
+                }
+                
+                const removeRequestInstance = function(uuid) {
+                    self.requestList[uuid] = null
+                }
+
+                removeUploadInstance(uuid)
+                addFailInstance(uploadURL, taskName, fileName, filePath, fileSize)
+                removeRequestInstance(uuid)
+
+                self.updateFunc({
+                    uploadList: self.uploadList,
+                    finishedList: self.finishedList,
+                    failList: self.failList,
+                })
             })
 
-            uploader.on('progress', function() {
+            listener.on('upload-progress', function(args) {
                 const getUploadInstanceIndex = function(uuid) {
                     for (let i = 0; i < self.uploadList.length; i++) {
                         if (self.uploadList[i]['uuid'] === uuid) {
@@ -237,8 +258,8 @@ class UploadFile {
 
                 const index = getUploadInstanceIndex(uuid)
 
-                const total = uploader.progressTotal
-                const newUploaded = uploader.progressAmount
+                const total = args.total
+                const newUploaded = args.uploaded
 
                 const lastUpdateUploaded = self.uploadList[index]['chunkSize']['lastUpdateUploaded']
 
@@ -258,6 +279,7 @@ class UploadFile {
                     self.updateFunc({
                         uploadList: self.uploadList,
                         finishedList: self.finishedList,
+                        failList: self.failList,
                     })
                 } else {
                     const speed = self.uploadList[index]['speed']
@@ -266,9 +288,9 @@ class UploadFile {
                 }
             })
 
-            uploader.on('end', (err) => {
+            listener.on('upload-end', (err) => {
                 if (err) {
-                    log('upload fail', err)
+                    log('upload-end-error', err)
                 } else {
                     const removeUploadInstance = function(uuid) {
                         for (let i = 0; i < self.uploadList.length; i++) {
@@ -284,7 +306,6 @@ class UploadFile {
                             taskName: taskName,
                             fileName: fileName, 
                             fileSize: fileSize,
-                            speed: 0,
                         }
 
                         self.finishedList.push(finishInstance)
@@ -292,7 +313,7 @@ class UploadFile {
 
                     const removeRequestInstance = function(uuid) {
                         self.requestList[uuid] = null
-                    } 
+                    }
 
                     removeUploadInstance(uuid)
                     addFinishedInstance(taskName, fileName, fileSize)
@@ -301,10 +322,13 @@ class UploadFile {
                     self.updateFunc({
                         uploadList: self.uploadList,
                         finishedList: self.finishedList,
+                        failList: self.failList,
                     })
                 }
             })
         }
+
+        uploadS3(this, uploadURL, fileName, filePath, fileSize, taskName)
     }
 
     cancelUpload(fileName, taskName) {

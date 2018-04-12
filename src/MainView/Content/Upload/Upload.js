@@ -66,23 +66,13 @@ class Upload extends React.Component {
                 render: (text) => {
                     switch(text) {
                         case 'uploading':
-                            return (
-                                <div style={{display: 'flex', alignItems: 'center'}}>
-                                    上传中
-                                </div>
-                            )
+                            return '上传中'
                         case 'stopped':
-                            return (
-                                <div style={{display: 'flex', alignItems: 'center'}}>
-                                    已取消
-                                </div>
-                            )
+                            return '已取消'
                         case 'finished':
-                            return (
-                                <div style={{display: 'flex', alignItems: 'center'}}>
-                                    已完成
-                                </div>
-                            )
+                            return '已完成'
+                        case 'fail':
+                            return '上传失败'
                     }
                 },
             },
@@ -128,6 +118,10 @@ class Upload extends React.Component {
                                 <span>
                                     <a href="#">删除文件</a>
                                 </span>
+                            )
+                        case 'fail':
+                            return (
+                                <span><a href="#">重新上传</a></span>
                             )
                     }
                 },
