@@ -161,7 +161,9 @@ class UploadFile {
         }
     
         const uploadS3 = function(self, uploadURL, fileName, filePath, fileSize, taskName) {
-            const pushToUploadList = function(uuid) {
+            const uuid = `${taskName}-${fileName}`
+
+            const pushToUploadList = function() {
                 let startTime = new Date()
                 startTime = startTime.getTime()
 
@@ -178,10 +180,8 @@ class UploadFile {
                 }
                 self.uploadList.push(uploadInstance)
             }
-
-            const uuid = `${taskName}-${fileName}`
             
-            pushToUploadList(uuid)
+            pushToUploadList()
 
             const s3 = new S3Client({
                 accessKeyId: 'N3Z92X0RX6J4FXQ70JHX',

@@ -95,7 +95,49 @@ class S3Client {
         return uploadInstance
     }
 
-    downloadFile(filePath, fileName, bucketName) {}
+    downloadFile(filePath, fileName, bucketName) {
+        const downloadInstance = new EventEmitter()
+
+        const outStream = fs.createWriteStream(filePath, { autoClose: true })
+
+        const params = {
+            Bucket: bucketName, 
+            Key: fileName,
+        }
+
+        const request = this.client.getObject(params, (err) => {
+            if (err) {
+                downloadInstance.emit('download-error', err)
+                log('download request error', err)
+            }
+        })
+
+        request.on('httpData', (chunk) => {
+            outStream.write(chunk)
+        })
+
+        request.on('httpDone', () => {
+            log('download-end')
+            downloadInstance.emit('download-end')
+            outStream.end()
+        })
+
+        request.on('httpError', (err) => {
+            log('download error', err)
+            downloadInstance.emit('download-error', err)
+            outStream.end()
+        })
+
+        request.on('httpDownloadProgress', (progress) => {
+            log('download-progress', progress)
+            downloadInstance.emit('download-progress', {
+                downloaded: progress.loaded,
+                total: progress.total,
+            })
+        })
+
+        return downloadInstance
+    }
 }
 
 module.exports = S3Client
