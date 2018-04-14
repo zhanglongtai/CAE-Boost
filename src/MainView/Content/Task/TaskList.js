@@ -6,7 +6,7 @@ import Icon from "antd/lib/icon"
 
 import log from "../../../util/log"
 
-// const {ipcRenderer} = window.require("electron")
+const { ipcRenderer } = window.require("electron")
 
 class TaskList extends React.Component {
     constructor() {
@@ -25,6 +25,10 @@ class TaskList extends React.Component {
     navTaskDetail(name, id) {
         this.props.setContent('task-detail')
         this.props.setTaskDetail(name, id)
+    }
+
+    openTaskFileListWin(taskID) {
+        ipcRenderer.send('open-task-file-list-win', taskID)
     }
 
     render() {
@@ -155,9 +159,7 @@ class TaskList extends React.Component {
                         case 'finished':
                             return (
                                 <span>
-                                    <a href="#">终止任务</a>
-                                    <Divider type="vertical" />
-                                    <a href="#">下载任务</a>
+                                    <a onClick={this.openTaskFileListWin.bind(null, item.id)}>下载任务</a>
                                 </span>
                             )
                     }

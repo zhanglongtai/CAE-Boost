@@ -10,6 +10,7 @@ module.exports = {
         charge: './src/chargeIndex.js',
         billHistory: './src/billHistoryIndex.js',
         nodeTypeSelector: './src/nodeTypeSelectorIndex.js',
+        taskFileList: './src/taskFileListIndex.js',
     },
   
     output: {

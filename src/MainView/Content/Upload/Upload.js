@@ -128,14 +128,14 @@ class Upload extends React.Component {
             },
         ]
 
-        const { uploadList, finishedList } = this.props
+        const { uploadList, failList, finishedList } = this.props
 
-        const listData = uploadList.concat(finishedList)
+        const listData = uploadList.concat(failList, finishedList)
         formatListKey(listData)
 
         return (
             <div
-                className='upload'
+                className='upload-container'
                 style={styles.container}
             >
                 <Table
@@ -151,6 +151,7 @@ class Upload extends React.Component {
 Upload.propTypes = {
     uploadList: PropTypes.array.isRequired,
     finishedList: PropTypes.array.isRequired,
+    failList: PropTypes.array.isRequired,
 }
 
 export default Upload

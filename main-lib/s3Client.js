@@ -75,7 +75,7 @@ class S3Client {
             })
 
             r.on('httpUploadProgress', (progress, response) => {
-                log('httpUploadProgress', progress)
+                // log('httpUploadProgress', progress)
             })
         }
 
@@ -129,7 +129,6 @@ class S3Client {
         })
 
         request.on('httpDownloadProgress', (progress) => {
-            log('download-progress', progress)
             downloadInstance.emit('download-progress', {
                 downloaded: progress.loaded,
                 total: progress.total,

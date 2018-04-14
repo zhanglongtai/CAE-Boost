@@ -9,7 +9,7 @@ import log from "../../util/log"
 
 const {ipcRenderer} = window.require("electron")
 
-const formattedUploadList = function(list) {
+const formattedUploadOfUploadList = function(list) {
     return list.map((item, index) => {
         const formattedSize = function(fileSize) {
             let size = fileSize
@@ -72,24 +72,24 @@ const formattedUploadList = function(list) {
     })
 }
 
-const formattedFinishedList = function(list) {
-    return list.map((item, index) => {
-        const formattedSize = function(fileSize) {
-            let size = fileSize
-            let unit = "B"
-            if (size >= 1024*1024) {
-                size = Math.round(size / 1024 / 1024)
-                unit = "MB"
-            } else if (size >= 1024){
-                unit = "KB"
-                size = Math.round(size / 1024)
-            } else {
-                size = Math.round(size)
-            }
-
-            return `${size} ${unit}`
+const formattedUploadOfFinishedList = function(list) {
+    const formattedSize = function(fileSize) {
+        let size = fileSize
+        let unit = "B"
+        if (size >= 1024*1024) {
+            size = Math.round(size / 1024 / 1024)
+            unit = "MB"
+        } else if (size >= 1024){
+            unit = "KB"
+            size = Math.round(size / 1024)
+        } else {
+            size = Math.round(size)
         }
 
+        return `${size} ${unit}`
+    }
+
+    return list.map((item, index) => {
         const key = index
         const fileName = item.fileName
         const state = 'finished'
@@ -110,7 +110,7 @@ const formattedFinishedList = function(list) {
     })
 }
 
-const formattedFailList = function(list) {
+const formattedUploadOfFailList = function(list) {
     return list.map((item, index) => {
         const formattedSize = function(fileSize) {
             let size = fileSize
@@ -148,14 +148,155 @@ const formattedFailList = function(list) {
     })
 }
 
+const formattedDownloadOfUploadList = function(list) {
+    return list.map((item, index) => {
+        const formattedSize = function(fileSize) {
+            let size = fileSize
+            let unit = "B"
+            if (size >= 1024*1024) {
+                size = (size / 1024 / 1024).toFixed(1)
+                unit = "MB"
+            } else if (size >= 1024){
+                unit = "KB"
+                size = Math.round(size / 1024)
+            } else {
+                size = Math.round(size)
+            }
+
+            return `${size} ${unit}`
+        }
+
+        const formattedSpeed = function(speed) {
+            let s = speed
+            let unit = "B/S"
+
+            if (s >= 1024*1024) {
+                s = (s / 1024 / 1024).toFixed(1)
+                unit = "MB/S"
+            } else if (s >= 1024){
+                unit = "KB/S"
+                s = (s / 1024).toFixed(1)
+            } else {
+                s = (s).toFixed(1)
+            }
+
+            return `${s} ${unit}`
+        }
+
+        const key = index
+        const fileName = item.fileName
+        const state = 'downloading'
+        
+        let percent
+        if (item.chunkSize.total !==0 ) {
+            percent = (item.chunkSize.downloaded / item.chunkSize.total * 100).toFixed(1)
+            percent = `${percent}%`
+        } else {
+            percent = '-'
+        }
+
+        const speed = formattedSpeed(item.speed)
+        const size = formattedSize(item.fileSize)
+
+        return {
+            key: key,
+            fileName: fileName,
+            state: state,
+            percent: percent,
+            speed: speed,
+            size: size,
+        }
+    })
+}
+
+const formattedDownloadOfFinishedList = function(list) {
+    const formattedSize = function(fileSize) {
+        let size = fileSize
+        let unit = "B"
+        if (size >= 1024*1024) {
+            size = Math.round(size / 1024 / 1024)
+            unit = "MB"
+        } else if (size >= 1024){
+            unit = "KB"
+            size = Math.round(size / 1024)
+        } else {
+            size = Math.round(size)
+        }
+
+        return `${size} ${unit}`
+    }
+
+    return list.map((item, index) => {
+        const key = index
+        const fileName = item.fileName
+        const state = 'finished'
+        const percent = '-'
+        const speed = '-'
+        const size = formattedSize(item.fileSize)
+
+        return {
+            key: key,
+            fileName: fileName,
+            state: state,
+            percent: percent,
+            speed: speed,
+            size: size,
+        }
+    })
+}
+
+const formattedDownloadOfFailList = function(list) {
+    return list.map((item, index) => {
+        const formattedSize = function(fileSize) {
+            let size = fileSize
+            let unit = "B"
+            if (size >= 1024*1024) {
+                size = Math.round(size / 1024 / 1024)
+                unit = "MB"
+            } else if (size >= 1024){
+                unit = "KB"
+                size = Math.round(size / 1024)
+            } else {
+                size = Math.round(size)
+            }
+
+            return `${size} ${unit}`
+        }
+
+        const key = index
+        const fileName = item.fileName
+        const state = 'fail'
+        const percent = '-'
+        const speed = '-'
+        const size = formattedSize(item.fileSize)
+
+        return {
+            key: key,
+            fileName: fileName,
+            state: state,
+            percent: percent,
+            speed: speed,
+            size: size,
+        }
+    })
+}
+
 class Content extends React.Component {
     constructor() {
         super()
 
         this.state = {
             contentIndex: 1,
-            uploadList: [],
-            finishedList: [],
+            upload: {
+                uploadList: [],
+                finishedList: [],
+                failList: [],
+            },
+            download: {
+                downloadList: [],
+                finishedList: [],
+                failList: [],
+            },
         }
 
         this.setContent = this.setContent.bind(this)
@@ -163,15 +304,30 @@ class Content extends React.Component {
 
     componentDidMount() {
         ipcRenderer.on('update-upload-file', (event, args) => {
-            log('receive-allfile', args)
-            const uploadList = formattedUploadList(args.uploadList)
-            const finishedList = formattedFinishedList(args.finishedList)
-            const failList = formattedFailList(args.failList)
+            const uploadList = formattedUploadOfUploadList(args.uploadList)
+            const finishedList = formattedUploadOfFinishedList(args.finishedList)
+            const failList = formattedUploadOfFailList(args.failList)
 
             this.setState({
-                uploadList: uploadList,
-                finishedList: finishedList,
-                failList: failList,
+                upload: {
+                    uploadList: uploadList,
+                    finishedList: finishedList,
+                    failList: failList,
+                }
+            })
+        })
+
+        ipcRenderer.on('update-download-file', (event, args) => {
+            const downloadList = formattedDownloadOfUploadList(args.downloadList)
+            const finishedList = formattedDownloadOfFinishedList(args.finishedList)
+            const failList = formattedDownloadOfFailList(args.failList)
+
+            this.setState({
+                download: {
+                    downloadList: downloadList,
+                    finishedList: finishedList,
+                    failList: failList,
+                }
             })
         })
     }
@@ -194,22 +350,26 @@ class Content extends React.Component {
             },
         }
 
-        const { contentIndex, uploadList, finishedList, failList } = this.state
+        const { contentIndex, upload, download } = this.state
 
         let content
         switch (contentIndex) {
             case 0:
                 content = <Upload
-                    uploadList={uploadList}
-                    finishedList={finishedList}
-                    failList={failList}
+                    uploadList={upload.uploadList}
+                    finishedList={upload.finishedList}
+                    failList={upload.failList}
                 />
                 break
             case 1:
                 content = <Task />
                 break
             case 2:
-                content = <Download />
+                content = <Download
+                    downloadList={download.downloadList}
+                    finishedList={download.finishedList}
+                    failList={download.failList}
+                />
                 break
             default:
                 content = null

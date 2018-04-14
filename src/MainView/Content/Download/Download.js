@@ -1,79 +1,10 @@
 import React from "react"
-// import PropTypes from "prop-types"
+import PropTypes from "prop-types"
 import Table from "antd/lib/table"
-import Divider from "antd/lib/divider"
 
 import log from "../../../util/log"
 
 // const {ipcRenderer} = window.require("electron")
-
-const columns = [
-    {
-        title: '状态',
-        dataIndex: 'state',
-        key: 'state',
-        render: (text) => {
-            switch(text) {
-                case 'downloading':
-                    return (
-                        <div style={{display: 'flex', alignItems: 'center'}}>
-                            下载中
-                        </div>
-                    )
-                case 'stopped':
-                    return (
-                        <div style={{display: 'flex', alignItems: 'center'}}>
-                            已取消
-                        </div>
-                    )
-                case 'finished':
-                    return (
-                        <div style={{display: 'flex', alignItems: 'center'}}>
-                            已完成
-                        </div>
-                    )
-            }
-        },
-    },
-    {
-        title: '任务名称',
-        dataIndex: 'name',
-        key: 'name',
-    },
-    {
-        title: '任务ID',
-        dataIndex: 'id',
-        key: 'id',
-    },
-    {
-        title: '进度',
-        dataIndex: 'percent',
-        key: 'percent',
-    },
-    {
-        title: '速度',
-        dataIndex: 'speed',
-        key: 'speed',
-    },
-    {
-        title: '操作',
-        key: 'action',
-        render: (text, item) => {
-            switch (item.state) {
-                case 'downloading':
-                    return (
-                        <span>
-                            <a href="#">取消下载</a>
-                        </span>
-                    )
-                case 'stopped':
-                    return null
-                case 'finished':
-                    return null
-            }
-        },
-    },
-]
 
 const fakeData = [
     {
@@ -86,9 +17,15 @@ const fakeData = [
     },
 ]
 
+const formatListKey = function(list) {
+    list.forEach((item, index) => {
+        item.key = index
+    })
+}
+
 class Download extends React.Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
     }
 
     componentDidMount() {
@@ -103,14 +40,84 @@ class Download extends React.Component {
             },
         }
 
+        const columns = [
+            {
+                title: '文件名',
+                dataIndex: 'fileName',
+                key: 'fileName',
+            },
+            {
+                title: '文件大小',
+                dataIndex: 'size',
+                key: 'size',
+                width: 100,
+            },
+            {
+                title: '状态',
+                dataIndex: 'state',
+                key: 'state',
+                width: 100,
+                render: (text) => {
+                    switch(text) {
+                        case 'downloading':
+                            return '下载中'
+                        case 'stopped':
+                            return '已取消'
+                        case 'finished':
+                            return '已完成'
+                        case 'fail':
+                            return '下载失败'
+                    }
+                },
+            },
+            {
+                title: '进度',
+                dataIndex: 'percent',
+                key: 'percent',
+                width: 100,
+            },
+            {
+                title: '速度',
+                dataIndex: 'speed',
+                key: 'speed',
+                width: 100,
+            },
+            {
+                title: '操作',
+                key: 'action',
+                width: 100,
+                render: (text, item) => {
+                    switch (item.state) {
+                        case 'downloading':
+                            return (
+                                <span><a href="#">取消下载</a></span>
+                            )
+                        case 'stopped':
+                            return null
+                        case 'finished':
+                            return '-'
+                        case 'fail':
+                            return (
+                                <span><a href="#">重新上传</a></span>
+                            )
+                    }
+                },
+            },
+        ]
+
+        const { downloadList, failList, finishedList } = this.props
+
+        const listData = downloadList.concat(failList, finishedList)
+        formatListKey(listData)
+
         return (
             <div
-                className='download'
+                className='download-container'
                 style={styles.container}
             >
                 <Table
                     columns={columns}
-                    dataSource={fakeData}
+                    dataSource={listData}
                     pagination={false}
                 />
             </div>
@@ -118,8 +125,10 @@ class Download extends React.Component {
     }
 }
 
-// Download.propTypes = {
-//     taskID: PropTypes.string.isRequired,
-// }
+Download.propTypes = {
+    downloadList: PropTypes.array.isRequired,
+    finishedList: PropTypes.array.isRequired,
+    failList: PropTypes.array.isRequired,
+}
 
 export default Download

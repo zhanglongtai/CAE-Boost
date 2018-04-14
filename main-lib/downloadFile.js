@@ -11,11 +11,11 @@ class DownloadFile {
     constructor(callback) {
         /*
             uuid: '',
-            taskName: '',
+            taskID: '',
             fileName: fileName,
             filePath: filePath,
             speed: 0,
-            chunkSize: { total: 0, uploaded: 0, lastUpdateUploaded: 0 },
+            chunkSize: { total: 0, downloaded: 0, lastUpdateDownloaded: 0 },
             fileSize: fileSize,
             lastUpdateTime: startTime,
         */
@@ -31,9 +31,9 @@ class DownloadFile {
         }
     }
 
-    downLoad(uploadURL, fileName, filePath, fileSize, taskName) {
-        const downloadS3 = function(self, uploadURL, fileName, filePath, fileSize, taskName) {
-            const uuid = `${taskName}-${fileName}`
+    downLoad(downloadURL, fileName, filePath, fileSize, taskID) {
+        const downloadS3 = function(self, downloadURL, fileName, filePath, fileSize, taskID) {
+            const uuid = `${taskID}-${fileName}`
 
             const pushToDownloadList = function() {
                 let startTime = new Date()
@@ -41,7 +41,7 @@ class DownloadFile {
 
                 const downloadInstance = {
                     uuid: uuid,
-                    taskName: taskName,
+                    taskID: taskID,
                     fileName: fileName,
                     filePath: filePath,
                     speed: 0,
@@ -50,7 +50,7 @@ class DownloadFile {
                     lastUpdateTime: startTime,
                     remainingTime: 0,
                 }
-                self.uploadList.push(downloadInstance)
+                self.downloadList.push(downloadInstance)
             }
 
             pushToDownloadList()
@@ -62,7 +62,7 @@ class DownloadFile {
                 s3ForcePathStyle: true,
             })
 
-            const listener = s3.getObject(filePath, fileName, 'upload-test')
+            const listener = s3.downloadFile(filePath, fileName, 'upload-test')
 
             const getKey = function (key) {
                 return key
@@ -81,11 +81,11 @@ class DownloadFile {
                     }
                 }
 
-                const updateDownloadInstance = function(index, speed, uploaded, lastUpdateUploaded, lastUpdateTime) {
-                    self.uploadList[index]['speed'] = speed
-                    self.uploadList[index]['chunkSize']['downloaded'] = uploaded
-                    self.uploadList[index]['chunkSize']['lastUpdateDownloaded'] = lastUpdateUploaded
-                    self.uploadList[index]['lastUpdateTime'] = lastUpdateTime
+                const updateDownloadInstance = function(index, speed, downloaded, lastUpdateUploaded, lastUpdateTime) {
+                    self.downloadList[index]['speed'] = speed
+                    self.downloadList[index]['chunkSize']['downloaded'] = downloaded
+                    self.downloadList[index]['chunkSize']['lastUpdateDownloaded'] = lastUpdateUploaded
+                    self.downloadList[index]['lastUpdateTime'] = lastUpdateTime
                 }
 
                 const index = getDownloadInstanceIndex(uuid)
@@ -97,7 +97,7 @@ class DownloadFile {
 
                 let updateTime = new Date()
                 updateTime = updateTime.getTime()
-                const lastUpdateTime = self.uploadList[index]['lastUpdateTime']
+                const lastUpdateTime = self.downloadList[index]['lastUpdateTime']
                 const deltaTime = updateTime - lastUpdateTime
 
                 // the event is trigged too fast, which lead to renderer page get stucked
@@ -109,18 +109,18 @@ class DownloadFile {
                     updateDownloadInstance(index, speed, newDownloaded, newDownloaded, updateTime)
 
                     self.updateFunc({
-                        uploadList: self.uploadList,
+                        downloadList: self.downloadList,
                         finishedList: self.finishedList,
                         failList: self.failList,
                     })
                 } else {
-                    const speed = self.uploadList[index]['speed']
+                    const speed = self.downloadList[index]['speed']
 
                     updateDownloadInstance(index, speed, newDownloaded, lastUpdateDownloaded, lastUpdateTime)
                 }
             })
 
-            listener.on('upload-end', () => {
+            listener.on('download-end', () => {
                 const removeDownloadInstance = function(uuid) {
                     for (let i = 0; i < self.downloadList.length; i++) {
                         if (self.downloadList[i]['uuid'] === uuid) {
@@ -130,9 +130,9 @@ class DownloadFile {
                     }
                 }
 
-                const addFinishedInstance = function(taskName, fileName, fileSize) {
+                const addFinishedInstance = function(taskID, fileName, fileSize) {
                     const finishInstance = {
-                        taskName: taskName,
+                        taskID: taskID,
                         fileName: fileName, 
                         fileSize: fileSize,
                     }
@@ -145,18 +145,18 @@ class DownloadFile {
                 }
 
                 removeDownloadInstance(uuid)
-                addFinishedInstance(taskName, fileName, fileSize)
+                addFinishedInstance(taskID, fileName, fileSize)
                 removeRequestInstance(uuid)
 
                 self.updateFunc({
-                    uploadList: self.uploadList,
+                    downloadList: self.downloadList,
                     finishedList: self.finishedList,
                     failList: self.failList,
                 })
             })
 
-            listener.on('upload-error', (err) => {
-                log("upload-error", err)
+            listener.on('download-error', (err) => {
+                log("download-error", err)
 
                 const removeDownloadInstance = function(uuid) {
                     for (let i = 0; i < self.downloadList.length; i++) {
@@ -167,10 +167,10 @@ class DownloadFile {
                     }
                 }
 
-                const addFailInstance = function(uploadURL, taskName, fileName, filePath, fileSize) {
+                const addFailInstance = function(downloadURL, taskID, fileName, filePath, fileSize) {
                     const failInstance = {
-                        uploadURL: uploadURL,
-                        taskName: taskName,
+                        downloadURL: downloadURL,
+                        taskID: taskID,
                         fileName: fileName, 
                         fileSize: fileSize,
                         filePath: filePath,
@@ -184,21 +184,21 @@ class DownloadFile {
                 }
 
                 removeDownloadInstance(uuid)
-                addFailInstance(uploadURL, taskName, fileName, filePath, fileSize)
+                addFailInstance(downloadURL, taskID, fileName, filePath, fileSize)
                 removeRequestInstance(uuid)
 
                 self.updateFunc({
-                    uploadList: self.uploadList,
+                    downloadList: self.downloadList,
                     finishedList: self.finishedList,
                     failList: self.failList,
                 })
             })
         }
 
-        downloadS3(this, uploadURL, fileName, filePath, fileSize, taskName)
+        downloadS3(this, downloadURL, fileName, filePath, fileSize, taskID)
     }
 
-    cancelDownload(fileName, taskName) {
+    cancelDownload(fileName, taskID) {
         const that = this
 
         const getRequestInstanceIndex = function(uuid) {
@@ -209,7 +209,7 @@ class DownloadFile {
             }
         }
         
-        const uuid = `${taskName}-${fileName}`
+        const uuid = `${taskID}-${fileName}`
 
         const index = getRequestInstanceIndex(uuid)
 

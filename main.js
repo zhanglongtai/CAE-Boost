@@ -7,6 +7,8 @@ const {
 
 const StoreConfig = require("./main-lib/storeConfig")
 const UploadFile = require("./main-lib/uploadFile")
+const DownloadFile = require("./main-lib/downloadFile")
+const GetTaskListFile = require("./main-lib/getTaskFileList")
 
 const config = {
     env: 'dev', // 'dev' or 'prod'
@@ -35,6 +37,7 @@ const win = {
     winNodeTypeSelector: null,
     winCharge: null,
     winBillHistory: null,
+    winTaskFileList: null,
 }
 
 
@@ -75,66 +78,66 @@ app.on('will-quit', () => {
 
 
 // ========== TestDownload ==========
-const createTestDownloadWin = function() {
-    const options = {
-        width: 600,
-        height: 600,
-        show: true,
-    }
+// const createTestDownloadWin = function() {
+//     const options = {
+//         width: 600,
+//         height: 600,
+//         show: true,
+//     }
 
-    win.winTestDownload = new BrowserWindow(options)
+//     win.winTestDownload = new BrowserWindow(options)
     
-    if (config.env === 'dev') {
-        win.winTestDownload.webContents.openDevTools()
-    }
+//     if (config.env === 'dev') {
+//         win.winTestDownload.webContents.openDevTools()
+//     }
     
-    win.winTestDownload.loadURL(`file://${__dirname}/renderer/testDownload.html`)
-}
+//     win.winTestDownload.loadURL(`file://${__dirname}/renderer/testDownload.html`)
+// }
 
-ipcMain.on('download-file', (event, url) => {
-    log('down load url', url)
-    win.winTestDownload.webContents.downloadURL(url)
+// ipcMain.on('download-file', (event, url) => {
+//     log('down load url', url)
+//     win.winTestDownload.webContents.downloadURL(url)
 
-    const fileNameList = url.split('/')
-    const fileName = fileNameList[fileNameList.length - 1]
+//     const fileNameList = url.split('/')
+//     const fileName = fileNameList[fileNameList.length - 1]
 
-    win.winTestDownload.webContents.session.on('will-download', (sessionEvent, item, webContents) => {
-        // Set the save path, making Electron not to prompt a save dialog.
-        item.setSavePath(`/tmp/${fileName}`)
+//     win.winTestDownload.webContents.session.on('will-download', (sessionEvent, item, webContents) => {
+//         // Set the save path, making Electron not to prompt a save dialog.
+//         item.setSavePath(`/tmp/${fileName}`)
       
-        item.on('updated', (updateEvent, state) => {
-            if (state === 'interrupted') {
-                log('Download is interrupted but can be resumed')
-            } else if (state === 'progressing') {
-                if (item.isPaused()) {
-                    log('Download is paused')
-                } else {
-                    const received = item.getReceivedBytes()
-                    const total = item.getTotalBytes()
-                    const percent = Math.floor(received/total*100)
-                    log(`Received bytes: ${item.getReceivedBytes()}`)
-                    event.sender.send('download-update', percent)
-                }
-            }
-        })
+//         item.on('updated', (updateEvent, state) => {
+//             if (state === 'interrupted') {
+//                 log('Download is interrupted but can be resumed')
+//             } else if (state === 'progressing') {
+//                 if (item.isPaused()) {
+//                     log('Download is paused')
+//                 } else {
+//                     const received = item.getReceivedBytes()
+//                     const total = item.getTotalBytes()
+//                     const percent = Math.floor(received/total*100)
+//                     log(`Received bytes: ${item.getReceivedBytes()}`)
+//                     event.sender.send('download-update', percent)
+//                 }
+//             }
+//         })
 
-        item.once('done', (event, state) => {
-            if (state === 'completed') {
-                log('Download successfully')
-            } else {
-                log(`Download failed: ${state}`)
-            }
-        })
+//         item.once('done', (event, state) => {
+//             if (state === 'completed') {
+//                 log('Download successfully')
+//             } else {
+//                 log(`Download failed: ${state}`)
+//             }
+//         })
 
-        ipcMain.on('pause-download', () => {
-            item.pause()
-        })
+//         ipcMain.on('pause-download', () => {
+//             item.pause()
+//         })
 
-        ipcMain.on('resume-download', () => {
-            item.resume()
-        })
-    })
-})
+//         ipcMain.on('resume-download', () => {
+//             item.resume()
+//         })
+//     })
+// })
 // ========== TestDownload ==========
 
 
@@ -301,6 +304,17 @@ ipcMain.on('main-view-ready-to-show', () => {
         accessToken: accessToken,
     })
     win.winMainView.show()
+})
+
+ipcMain.on('main-view-task-component-ready-to-show', () => {
+    const storeConfig = new StoreConfig()
+    const username = storeConfig.get('username')
+    const accessToken = storeConfig.get('access-token')
+
+    win.winMainView.webContents.send('user-info', {
+        username: username,
+        accessToken: accessToken,
+    })
 })
 
 ipcMain.on('close-main-view-win-open-login-win', () => {
@@ -558,3 +572,82 @@ ipcMain.on('upload-file', (event, args) => {
     })
 })
 // ========== Upload File ==========
+
+
+// ========== Task File List ==========
+const createTaskFileListWin = function() {
+    const options = {
+        width: 600,
+        height: 500,
+        frame: false,
+        // resizable: false,
+        show: true,
+        parent: win.winMainView,
+        modal: true,
+    }
+
+    win.winTaskFileList = new BrowserWindow(options)
+
+    if (config.env === 'dev') {
+        win.winTaskFileList.webContents.openDevTools()
+    }
+
+    win.winTaskFileList.loadURL(`file://${__dirname}/renderer/taskFileList.html`)
+
+    win.winTaskFileList.on('closed', () => {
+        win.winTaskFileList = null
+    })
+}
+
+ipcMain.on('open-task-file-list-win', (event, taskID) => {
+    createTaskFileListWin()
+
+    ipcMain.once('task-file-list-ready-to-show', () => {
+        win.winTaskFileList.show()
+        win.winTaskFileList.webContents.send('task-id', taskID)
+    })
+})
+
+ipcMain.on('close-task-file-list-win', () => {
+    win.winTaskFileList.close()
+})
+
+const updateTaskFileList = function(success, fileList, errorMsg) {
+    const args = {
+        success: success,
+        fileList: fileList,
+        errorMsg: errorMsg,
+    }
+
+    win.winTaskFileList.webContents.send('update-task-file-list', args)
+}
+
+const getTaskListFile = new GetTaskListFile(updateTaskFileList)
+
+ipcMain.on('get-task-file-list', (event, taskID) => {
+    // getTaskListFile.list(taskID)
+    getTaskListFile.list('upload-test')
+})
+// ========== Task File List ==========
+
+
+// ========== Download File ==========
+const updateDownloadFile = function(allFile) {
+    // allFile = {uploadList: [...], finishedList: [...]}
+    win.winMainView.webContents.send('update-download-file', allFile)
+}
+
+const downloadFile = new DownloadFile(updateDownloadFile)
+
+ipcMain.on('download-file', (event, args) => {
+    const { fileList, folderPath, taskID } = args
+
+    fileList.forEach((item) => {
+        const { fileName, fileSize } = item
+        const filePath = `${folderPath}\\${fileName}`
+        const downloadURL = config.downloadURL
+
+        downloadFile.downLoad(downloadURL, fileName, filePath, fileSize, taskID)
+    })
+})
+// ========== Download File ==========

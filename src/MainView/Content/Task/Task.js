@@ -82,6 +82,8 @@ class Task extends React.Component {
     }
 
     componentDidMount() {
+        ipcRenderer.send('main-view-task-component-ready-to-show')
+        
         ipcRenderer.on('user-info', (event, args) => {
             const { accessToken } = args
             this.setState({
