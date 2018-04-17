@@ -480,6 +480,7 @@ const createChargeWin = function() {
         width: 500,
         height: 500,
         frame: false,
+        show: false,
         // resizable: false,
         parent: win.winMainView,
         modal: true,
@@ -500,6 +501,16 @@ const createChargeWin = function() {
 
 ipcMain.on('open-charge-win', () => {
     createChargeWin()
+})
+
+ipcMain.on('charge-ready-to-show', () => {
+    const storeConfig = new StoreConfig()
+    const accessToken = storeConfig.get('access-token')
+
+    win.winCharge.webContents.send('user-info', {
+        accessToken: accessToken,
+    })
+    win.winCharge.show()
 })
 
 ipcMain.on('close-charge-win', () => {

@@ -36,15 +36,20 @@ class QRCodeURL extends React.Component {
     }
 
     checkPay() {
-        const { tradeID, accessToken, navTo, navToErrorMsg } = this.props
+        const { tradeID, accessToken, payChannel, navTo, navToErrorMsg } = this.props
 
-        const url = getCheckPayAPI(tradeID)
+        // const url = getCheckPayAPI(tradeID)
 
+        const url = getCheckPayAPI(payChannel)
         fetch(url, {
-            method: 'GET',
+            method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`,
             },
+            body: JSON.stringify({
+                'pay_id': tradeID,
+            }),
         })
             .then((response) => {
                 if (response.status >= 200 && response.status < 500) {
@@ -61,12 +66,16 @@ class QRCodeURL extends React.Component {
                 return response.json()
             })
             .then((result) => {
-                if (result['success']) {
+                if (result['result'] === 'success') {
                     navTo('pay-result')
-                } else {
+                } else if (result['result'] === 'pending') {
                     this.timer = setTimeout(() => {
                         this.checkPay()
                     }, 1000)
+                } else {
+                    // result['result'] === 'fail'
+                    const error = new Error('交易失败')
+                    throw error
                 }
             })
             .catch((error) => {
@@ -103,6 +112,7 @@ class QRCodeURL extends React.Component {
             <div className='qr-code-content' style={styles.content}>
                 <img src={logoURL} style={{height: 30}} />
                 <canvas id='qrcode-canvas' />
+                <h3>支付完成前请勿关闭支付页面</h3>
             </div>
         )
     }

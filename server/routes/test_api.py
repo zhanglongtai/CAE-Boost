@@ -96,8 +96,9 @@ def login():
 
         return switch[1]()
     else:
-        data = request.data
-        data = json.loads(data)
+        # data = request.data
+        # data = json.loads(data)
+        data = request.get_json()
 
         print(data)
 
@@ -175,8 +176,9 @@ def task_list():
 
 @test_api.route('/task', methods=['POST'])
 def submit_task():
-    data = request.data
-    data = json.loads(data)
+    # data = request.data
+    # data = json.loads(data)
+    data = request.get_json()
 
     print(data)
 
@@ -318,8 +320,9 @@ def password():
 
 @test_api.route('/charge', methods=['POST'])
 def charge():
-    data = request.data
-    data = json.loads(data)
+    # data = request.data
+    # data = json.loads(data)
+    data = request.get_json()
 
     print(data)
 

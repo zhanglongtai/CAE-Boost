@@ -1,10 +1,17 @@
 import config from "./config"
 
+let baseURL
+if (config.env === 'dev-local') {
+    baseURL = config.baseURL
+} else if (config.env === 'dev-remote') {
+    baseURL = config.remoteBaseURL
+}
+
 const getloginAPI = function() {
     if (config.env === 'dev') {
         return config.testLoginURL
     } else {
-        return `${config.baseURL}/login`
+        return `${baseURL}/login`
     }
 }
 
@@ -12,7 +19,7 @@ const getRegisterAPI = function() {
     if (config.env === 'dev') {
         return config.testRegisterURL
     } else {
-        return `${config.baseURL}/register`
+        return `${baseURL}/register`
     }
 }
 
@@ -20,7 +27,7 @@ const getTaskListAPI = function() {
     if (config.env === 'dev') {
         return config.testTaskListURL
     } else {
-        return `${config.baseURL}/task-list`
+        return `${baseURL}/task-list`
     }
 }
 
@@ -28,7 +35,7 @@ const getTaskAPI = function(taskID) {
     if (config.env === 'dev') {
         return `${config.testTaskURL}/${taskID}`
     } else {
-        return `${config.baseURL}/task/${taskID}`
+        return `${baseURL}/task/${taskID}`
     }
 }
 
@@ -36,13 +43,13 @@ const getSubmitTaskAPI = function() {
     if (config.env === 'dev') {
         return `${config.testSubmitTaskURL}`
     } else {
-        return `${config.baseURL}/task`
+        return `${baseURL}/task`
     }
 }
 
 const getResidualAPI = function() {
-    const protocol = config.baseURL.split("/")[0]
-    const host = config.baseURL.split("/")[2]
+    const protocol = baseURL.split("/")[0]
+    const host = baseURL.split("/")[2]
     return `${protocol}//${host}`
 }
 
@@ -50,7 +57,7 @@ const getBillAPI = function() {
     if (config.env === 'dev') {
         return config.testBillURL
     } else {
-        return `${config.baseURL}/bill`
+        return `${baseURL}/bill`
     }
 }
 
@@ -58,23 +65,31 @@ const getPasswordAPI = function() {
     if (config.env === 'dev') {
         return config.testPasswordURL
     } else {
-        return `${config.baseURL}/password`
+        return `${baseURL}/password`
     }
 }
 
-const getChargeAPI = function() {
+const getChargeAPI = function(channel) {
     if (config.env === 'dev') {
         return config.testChargeURL
     } else {
-        return `${config.baseURL}/charge`
+        if (channel === 'wx-pay') {
+            return `${baseURL}/wxpay_url`
+        } else {
+            return `${baseURL}/charge`
+        }
     }
 }
 
-const getCheckPayAPI = function(tradeID) {
+const getCheckPayAPI = function(channel, tradeID) {
     if (config.env === 'dev') {
         return config.testCheckPayURL
     } else {
-        return `${config.baseURL}/charge/${tradeID}`
+        if (channel === 'wx-pay') {
+            return `${baseURL}/wxpay_check`
+        } else {
+            return `${baseURL}/charge/${tradeID}`
+        }
     }
 }
 

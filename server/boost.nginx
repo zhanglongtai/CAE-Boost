@@ -1,0 +1,14 @@
+server {
+    listen 80;
+
+    location /upload {
+        alias /home/ubuntu/Projects/server/upload;
+    }
+    location /static {
+        alias /home/ubuntu/Projects/server/static;
+    }
+
+    location / {
+        proxy_pass http://localhost:2000;
+    }
+}

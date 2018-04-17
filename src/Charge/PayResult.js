@@ -39,6 +39,7 @@ class PayResult extends React.Component {
                 <div
                     style={{
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         margin: '0 0 40px 0',

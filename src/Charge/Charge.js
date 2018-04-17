@@ -40,6 +40,7 @@ class Charge extends React.Component {
     }
 
     componentDidMount() {
+        ipcRenderer.send('charge-ready-to-show')
         ipcRenderer.on('user-info', (event, args) => {
             const { accessToken } = args
             this.setState({
@@ -55,7 +56,7 @@ class Charge extends React.Component {
         const { accessToken, amount } = this.state
 
         // const url = `${getloginAPI()}?username=${username}&password=${password}`
-        const url = `${getChargeAPI()}`
+        const url = `${getChargeAPI(payChannel)}`
         fetch(url, {
             method: 'POST',
             headers: {

@@ -5,3 +5,5 @@
 __pycache__
 .idea
 /server/upload
+/server/config.py
+/server/logs
