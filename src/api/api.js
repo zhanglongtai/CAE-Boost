@@ -48,9 +48,13 @@ const getSubmitTaskAPI = function() {
 }
 
 const getResidualAPI = function() {
-    const protocol = baseURL.split("/")[0]
-    const host = baseURL.split("/")[2]
-    return `${protocol}//${host}`
+    if (config.env === 'dev') {
+        return config.testResidualAPI
+    } else {
+        const protocol = baseURL.split("/")[0]
+        const host = baseURL.split("/")[2]
+        return `${protocol}//${host}`
+    }
 }
 
 const getBillAPI = function() {
